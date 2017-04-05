@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context="com.ilya.translator.MainActivity"
+    >
+  <TextView
+      android:id="@+id/lang1"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      tools:text="language2"
+
+      android:textSize="20sp"
+      />
+  <TextView
+      android:id="@+id/lang2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      tools:text="language1"
+      android:textSize="20sp"
+      android:layout_toEndOf="@+id/lang1"
+      />
+  <EditText
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:gravity="top|left"
+      android:inputType="textMultiLine"
+      android:lines="8"
+      android:padding="8dp"
+      android:hint="Введите слово для перевода"
+      android:maxLines="10"
+      android:minLines="6"
+      android:background="@drawable/text_area_background"
+      android:layout_margin="4dp"
+      android:scrollbars="vertical"
+      android:layout_below="@+id/lang1"
+      />
+
+  <ImageView
+      android:id="@+id/img_map"
+      android:layout_width="240dp"
+      android:layout_height="240dp"
+      android:layout_centerInParent="true"
+      android:src="@drawable/ic_translate"
+      />
+
+
+</RelativeLayout>

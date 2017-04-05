@@ -1,3 +1,8 @@
 <resources>
   <string name="app_name">Translator</string>
+  <string name="translate">Перевести</string>
+  <string name="bookmarks">Закладки</string>
+  <string name="settings">настройки</string>
+  <string name="translate_from">Перевод с языка:</string>
+  <string name="translate_to">Перевод на язык:</string>
 </resources>

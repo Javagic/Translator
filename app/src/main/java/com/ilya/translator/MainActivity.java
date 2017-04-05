@@ -1,15 +1,15 @@
 package com.ilya.translator;
 
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
 
-import com.ilya.translator.Models.LanguageVariations;
-
-import rx.Subscriber;
-
-import static com.ilya.translator.Const.API_KEY;
+import com.ilya.translator.fragments.BookmarkFragment;
+import com.ilya.translator.fragments.SettingsFragment;
+import com.ilya.translator.fragments.TranslateFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,8 +17,31 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    Button button = (Button) findViewById(R.id.btn);
-    button.setOnClickListener(new View.OnClickListener() {
+    getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, TranslateFragment.newInstance()).commit();
+    BottomNavigationView bottomNavigationView = (BottomNavigationView)
+        findViewById(R.id.bottom_navigation);
+
+    bottomNavigationView.setOnNavigationItemSelectedListener
+        (item -> {
+          Fragment selectedFragment = null;
+          switch (item.getItemId()) {
+            case R.id.action_lang:
+              selectedFragment = TranslateFragment.newInstance();
+              break;
+            case R.id.action_bookmark:
+              selectedFragment = BookmarkFragment.newInstance();
+              break;
+            case R.id.action_settings:
+              selectedFragment = SettingsFragment.newInstance();
+              break;
+          }
+          FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+          transaction.replace(R.id.frame_layout, selectedFragment);
+          transaction.commit();
+          return true;
+        });
+
+    /*button.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
     RxBackgroundWrapper.doInBackground(
@@ -74,6 +97,6 @@ public class MainActivity extends AppCompatActivity {
           }
         });
       }
-    });
+    });*/
   }
 }
