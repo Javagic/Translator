@@ -1,27 +1,45 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+  <data>
+    <variable
+        name="textEntity"
+        type="com.ilya.translator.TextEntity" />
+  </data>
+
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context="com.ilya.translator.MainActivity"
+
+    android:layout_margin="10dp"
     >
   <TextView
       android:id="@+id/lang1"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      tools:text="language2"
-
+      android:text="language1"
       android:textSize="20sp"
+      />
+  <ImageButton
+      android:id="@+id/swap_language"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:layout_marginLeft="20dp"
+      android:layout_toEndOf="@+id/lang1"
       />
   <TextView
       android:id="@+id/lang2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      tools:text="language1"
+      android:text="language2"
       android:textSize="20sp"
-      android:layout_toEndOf="@+id/lang1"
+      android:layout_toEndOf="@+id/swap_language"
+      android:layout_marginLeft="40dp"
       />
   <EditText
+      android:id="@+id/text_area"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
       android:gravity="top|left"
@@ -32,18 +50,17 @@
       android:maxLines="10"
       android:minLines="6"
       android:background="@drawable/text_area_background"
-      android:layout_margin="4dp"
       android:scrollbars="vertical"
       android:layout_below="@+id/lang1"
       />
-
-  <ImageView
-      android:id="@+id/img_map"
-      android:layout_width="240dp"
-      android:layout_height="240dp"
-      android:layout_centerInParent="true"
-      android:src="@drawable/ic_translate"
-      />
-
-
+<TextView
+    android:id="@+id/result"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/text_area"
+    android:textSize="25dp"
+    android:textStyle="bold"
+    />
 </RelativeLayout>
+
+</layout>

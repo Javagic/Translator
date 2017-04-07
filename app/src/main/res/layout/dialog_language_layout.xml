@@ -2,22 +2,26 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="10dp"
+    android:minHeight="180dp"
+    android:minWidth="200dp"
     >
 
   <TextView
+      android:id="@+id/translate_from"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      tools:text="@string/translate_from"
+      android:text="@string/translate_from"
       android:textStyle="bold"
       />
   <android.support.v7.widget.RecyclerView
-      android:id="@+id/language_recycler"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_below="@+id/translate_from"
+      android:id="@+id/language_recycler"
       >
+
   </android.support.v7.widget.RecyclerView>
 </RelativeLayout>

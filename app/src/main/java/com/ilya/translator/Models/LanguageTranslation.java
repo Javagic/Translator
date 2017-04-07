@@ -2,6 +2,9 @@ package com.ilya.translator.Models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * Created by Ilya Reznik
  * reznikid@altarix.ru
@@ -14,10 +17,12 @@ public class LanguageTranslation {
   @SerializedName("code")
   public String code;
 
-  public String detectedLang;
+  @SerializedName("detected")
+  public HashMap<String,String> detectedLang;
 
   @SerializedName("lang")
   public String lang;
 
-  public String text;
+  @SerializedName("text")
+  public ArrayList<String> text;
 }

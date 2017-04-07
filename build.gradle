@@ -6,7 +6,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.3'
+    classpath 'com.android.tools.build:gradle:2.2.2'
 
     classpath 'me.tatarka:gradle-retrolambda:3.6.0'
 
@@ -29,4 +29,4 @@ task clean(type: Delete) {
 }
 
 
-ext.versions = [ ANDROID_SUPPORT: "25.0.0",]
+ext.versions = [ ANDROID_SUPPORT: "25.0.1",]

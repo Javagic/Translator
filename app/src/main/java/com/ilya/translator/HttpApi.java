@@ -1,5 +1,6 @@
 package com.ilya.translator;
 
+import com.ilya.translator.Models.LanguageTranslation;
 import com.ilya.translator.Models.LanguageVariations;
 
 import retrofit2.http.GET;
@@ -15,18 +16,22 @@ import rx.Observable;
  */
 public interface HttpApi {
 
-  @POST(Const.API_URL + "/getLanguages")
-  Observable<Object> getLanguages(@Query("key") String key, @Query("ui") String langCode);
+    @POST(Const.API_URL + "/getLangs")
+    Observable<LanguageVariations> getLanguages(@Query("key") String key, @Query("ui") String langCode);
 
-  @POST(Const.API_URL +"/detect")
-  Observable<Object> detect(@Query("key") String key,
-                            @Query("text") String text,
-                            @Query("hint") String hint);
+    @POST(Const.API_URL + "/detect")
+    Observable<Object> detect(@Query("key") String key,
+                              @Query("text") String text,
+                              @Query("hint") String hint);
 
-  @POST(Const.API_URL + "/translate")
-  Observable<Object> translate(@Query("key") String key,
-                               @Query("text") String text,
-                               @Query("lang") String lang,
-                               @Query("format") String plain,
-                               @Query("options") String options);
+    @POST(Const.API_URL + "/translate")
+    Observable<LanguageTranslation> translate(@Query("key") String key,
+                                              @Query("text") String text,
+                                              @Query("lang") String lang,
+                                              @Query("format") String plain,
+                                              @Query("options") String options);
+    @POST(Const.API_URL + "/translate")
+    Observable<LanguageTranslation> translateSimple(@Query("key") String key,
+                                              @Query("text") String text,
+                                              @Query("lang") String lang);
 }

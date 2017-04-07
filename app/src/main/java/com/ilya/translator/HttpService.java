@@ -19,34 +19,34 @@ import rx.functions.Func1;
  * on 03.04.17 19:38.
  */
 public class HttpService {
-  private static HttpService instance;
+    private static HttpService instance;
 
-  private HttpApi httpApi;
+    private HttpApi httpApi;
 
-  public static HttpService getInstance(){
-    if(instance == null){
-      instance = new HttpService();
+    public static HttpService getInstance() {
+        if (instance == null) {
+            instance = new HttpService();
+        }
+        return instance;
     }
-    return instance;
-  }
 
-  public HttpService() {
-    Retrofit retrofit = new Retrofit.Builder()
-        .baseUrl(Const.API_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .build();
-    httpApi = retrofit.create(HttpApi.class);
-  }
+    public HttpService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Const.API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+        httpApi = retrofit.create(HttpApi.class);
+    }
 
-  public HttpApi getHttpApi() {
-    return httpApi;
-  }
+    public HttpApi getHttpApi() {
+        return httpApi;
+    }
 
-  //public Observable<LanguageVariations> getLanguages(String key, String langCode){
-  //  return httpApi.getLanguages(key,langCode).flatMap(o -> {
-  //
-  //
-  //  });
-  //}
+    //public Observable<LanguageVariations> getLanguages(String key, String langCode){
+    //  return httpApi.getLanguages(key,langCode).flatMap(o -> {
+    //
+    //
+    //  });
+    //}
 }
