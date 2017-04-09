@@ -3,6 +3,8 @@ package com.ilya.translator.fragments;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -10,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.HttpService;
+import com.ilya.translator.MeaningAdapter;
 import com.ilya.translator.Models.LanguageTranslation;
+import com.ilya.translator.Pair;
 import com.ilya.translator.R;
 import com.ilya.translator.RxBackgroundWrapper;
 import com.ilya.translator.TranslatorManager;
@@ -29,13 +33,9 @@ import rx.functions.Action1;
  */
 public class TranslateFragment extends Fragment {
     TranslatorManager translatorManager;
-
+    RecyclerView recyclerView;
+    MeaningAdapter meaningAdapter;
     FragmentTranslateBinding binding;
-
-
-
-
-    Date date;
 
     //private FTranslateFragment binding;
 
@@ -62,10 +62,13 @@ public class TranslateFragment extends Fragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_translate, container, false);
-
         View view = binding.getRoot();
 
-        date = new Date();
+        recyclerView = binding.meaningRecycler;
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        meaningAdapter  = new MeaningAdapter();
+        recyclerView.setAdapter(meaningAdapter);
+
         binding.textArea.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -74,16 +77,22 @@ public class TranslateFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if ((new Date()).getTime() > date.getTime() + 200) {
-                    date = new Date();
+                if (charSequence.toString().isEmpty()) return;
+                String lastChar = charSequence.toString().substring(charSequence.length() - 1);
+                String query = charSequence.toString().trim();
+                if (" ,.;".contains(lastChar)) {
                     try {
-                        translatorManager.translate(charSequence).subscribe(languageTranslation -> {
+                        translatorManager.translate(query).subscribe(languageTranslation -> {
                             binding.result.setText(languageTranslation.text.get(0));
-
+                            binding.defWord.setText(query);
                         }, throwable -> {
-
                         });
-                        RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup("Hello","en-en")).subscribe(languageTranslation1 -> {
+
+                        String pair = Pair.pairFrom(translatorManager.getCurrentFrom(), translatorManager.getCurrentTo());
+                        RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup(query, pair)).subscribe(defModel -> {
+                            binding.pos.setText(defModel.pos);
+                            meaningAdapter.setMeaningList(defModel.tr);
+                        }, throwable -> {
 
                         });
                     } catch (UnsupportedEncodingException e) {

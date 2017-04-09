@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         //endregion
     }
 
-    private void initialize() {
+    private void initialize() { //TODO: отрефачить
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frame_layout, new TranslateFragment())
                 .commit();

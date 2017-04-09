@@ -1,5 +1,6 @@
 package com.ilya.translator;
 
+import com.ilya.translator.Models.DictionaryModel;
 import com.ilya.translator.Models.LanguageTranslation;
 
 import retrofit2.http.POST;
@@ -15,7 +16,7 @@ import rx.Observable;
 public interface DictionaryApi {
 
     @POST(Const.DICTIONARY_API_URL + "/lookup")
-    Observable<Object> lookup(@Query("key") String key,
-                                                    @Query("text") String text,
-                                                    @Query("lang") String lang);
+    Observable<DictionaryModel> lookup(@Query("key") String key,
+                                       @Query("text") String text,
+                                       @Query("lang") String lang);
 }

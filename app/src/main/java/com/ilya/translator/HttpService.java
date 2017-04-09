@@ -1,5 +1,6 @@
 package com.ilya.translator;
 
+import com.ilya.translator.Models.DictionaryModel;
 import com.ilya.translator.Models.LanguageTranslation;
 import com.ilya.translator.Models.PossibleLanguages;
 
@@ -7,6 +8,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
+import rx.functions.Func1;
 
 /**
  * Created by Ilya Reznik
@@ -52,7 +54,12 @@ public class HttpService {
         return translationApi.getLanguages(Const.TRANSLATION_API_KEY, langCode);
     }
 
-    public  Observable<Object> lookup(String text, String lang) {
-        return dictionaryApi.lookup(Const.DICTIONARY_API_KEY, text, lang);
+    public  Observable<DictionaryModel.DefModel> lookup(String text, String lang) {
+        return dictionaryApi.lookup(Const.DICTIONARY_API_KEY, text, lang).flatMap(new Func1<DictionaryModel, Observable<DictionaryModel.DefModel>>() {
+            @Override
+            public Observable<DictionaryModel.DefModel> call(DictionaryModel dictionaryModel) {
+                return Observable.just(dictionaryModel.def.get(0));
+            }
+        });
     }
 }

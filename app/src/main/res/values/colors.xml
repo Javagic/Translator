@@ -8,4 +8,10 @@
   <color name="white">#ffffff</color>
   <color name="black">#000000</color>
   <color name="lightGray">#ddd</color>
+  <color name="gray_500">#9e9e9e</color>
+  <color name="pink">#b441a9</color>
+  <color name="darkBlue">#4a76ab</color>
+  <color name="vinous">#893350</color>
+
+
 </resources>

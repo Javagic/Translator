@@ -45,6 +45,31 @@
         android:textStyle="bold"
         tools:text="привет"
         />
+    <TextView
+        android:id="@+id/def_word"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="привет"
+        android:paddingTop="8dp"
+        android:layout_below="@id/result"/>
+    <TextView
+        android:id="@+id/pos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/def_word"
+        tools:text="сущ"
+        android:textStyle="italic"
+        android:textColor="@color/pink"
+        android:textSize="15dp"
+        android:paddingTop="8dp"
+        />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/meaning_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pos">
+
+    </android.support.v7.widget.RecyclerView>
   </RelativeLayout>
 
 

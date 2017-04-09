@@ -26,11 +26,22 @@ public class Pair {
         this.to = pair.split("-")[1];
     }
 
+    public Pair(LanguageType type) {
+        this.from = type.shortName;
+        this.to = type.shortName;
+    }
     @Override
     public String toString() {
         return from + "-" + to;
     }
 
+    public static  String pairFrom(LanguageType type){
+        return type.shortName+"-"+type.shortName;
+    }
+
+    public static  String pairFrom(LanguageType typeFrom,LanguageType typeTo){
+        return typeFrom.shortName+"-"+typeTo.shortName;
+    }
     public static List<Pair> asList(List<String> list){
         List<Pair> pairs = new ArrayList<>();
         for (String s : list) {
