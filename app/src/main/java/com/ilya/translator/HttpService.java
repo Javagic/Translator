@@ -1,16 +1,12 @@
 package com.ilya.translator;
 
-import com.google.gson.internal.LinkedTreeMap;
-import com.ilya.translator.Models.LanguageVariations;
-
-import java.util.ArrayList;
-import java.util.Map;
+import com.ilya.translator.Models.LanguageTranslation;
+import com.ilya.translator.Models.PossibleLanguages;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.functions.Func1;
 
 /**
  * Created by Ilya Reznik
@@ -21,7 +17,8 @@ import rx.functions.Func1;
 public class HttpService {
     private static HttpService instance;
 
-    private HttpApi httpApi;
+    private TranslationApi translationApi;
+    private DictionaryApi dictionaryApi;
 
     public static HttpService getInstance() {
         if (instance == null) {
@@ -30,23 +27,32 @@ public class HttpService {
         return instance;
     }
 
-    public HttpService() {
+    private HttpService() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Const.API_URL)
+                .baseUrl(Const.TRANSLATION_API_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-        httpApi = retrofit.create(HttpApi.class);
+        translationApi = retrofit.create(TranslationApi.class);
+
+        Retrofit retrofit1 = new Retrofit.Builder()//можно убрать?
+                .baseUrl(Const.DICTIONARY_API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+        dictionaryApi = retrofit1.create(DictionaryApi.class);
     }
 
-    public HttpApi getHttpApi() {
-        return httpApi;
+
+    public Observable<LanguageTranslation> translate(String text, String lang, String plain, String options) {
+        return translationApi.translate(Const.TRANSLATION_API_KEY, text, lang, plain, options);
     }
 
-    //public Observable<LanguageVariations> getLanguages(String key, String langCode){
-    //  return httpApi.getLanguages(key,langCode).flatMap(o -> {
-    //
-    //
-    //  });
-    //}
+    public Observable<PossibleLanguages> getLanguages(String langCode) {
+        return translationApi.getLanguages(Const.TRANSLATION_API_KEY, langCode);
+    }
+
+    public  Observable<Object> lookup(String text, String lang) {
+        return dictionaryApi.lookup(Const.DICTIONARY_API_KEY, text, lang);
+    }
 }

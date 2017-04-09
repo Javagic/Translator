@@ -15,4 +15,9 @@ public class RxBackgroundWrapper {
   public static <T> Observable<T> doInBackground(final Observable<T> observable) {
     return observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
   }
+
+  <T> Observable.Transformer<T, T> applySchedulers() {
+    return observable -> observable.subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread());
+  }
 }

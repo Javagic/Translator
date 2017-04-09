@@ -1,11 +1,8 @@
 package com.ilya.translator.fragments;
 
-import android.app.Dialog;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,23 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.HttpService;
-import com.ilya.translator.LanguageAdapter;
-import com.ilya.translator.LanguageType;
 import com.ilya.translator.Models.LanguageTranslation;
 import com.ilya.translator.R;
 import com.ilya.translator.RxBackgroundWrapper;
-import com.ilya.translator.TextEntity;
+import com.ilya.translator.TranslatorManager;
 import com.ilya.translator.databinding.FragmentTranslateBinding;
 
-import org.parceler.Parcel;
-import org.parceler.Parcels;
-
-import java.util.ArrayList;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
-import rx.Subscriber;
-
-import static com.ilya.translator.Const.API_KEY;
+import rx.functions.Action1;
 
 /**
  * Created by Ilya Reznik
@@ -38,11 +28,15 @@ import static com.ilya.translator.Const.API_KEY;
  * on 05.04.17 20:03.
  */
 public class TranslateFragment extends Fragment {
+    TranslatorManager translatorManager;
+
     FragmentTranslateBinding binding;
-    TextEntity textEntity;
-    ArrayList<LanguageType> languages;
-     Dialog dialog;
+
+
+
+
     Date date;
+
     //private FTranslateFragment binding;
 
     public static TranslateFragment newInstance() {
@@ -52,9 +46,8 @@ public class TranslateFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-        dialog = new Dialog(getActivity());
+        translatorManager = TranslatorManager.getInstance();
     }
 
 
@@ -62,42 +55,17 @@ public class TranslateFragment extends Fragment {
     public void setArguments(Bundle args) {
         super.setArguments(args);
         //textEntity = args.getParcelable("textEntity");
-        languages = args.getParcelableArrayList("languages");
-        textEntity = new TextEntity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        date = new Date();
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_translate, container, false);
+
         View view = binding.getRoot();
-        //binding.setTextEntity(textEntity);
-        LanguageAdapter.LanguageAdapterCallback listener = position -> {
-            textEntity.currentLang = languages.get(position);
-            binding.lang1.setText(languages.get(position).ui);
-            dialog.dismiss();
-        };
-        binding.lang1.setOnClickListener(view1 -> {
-            dialog.setContentView(R.layout.dialog_language_layout);
-            RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setAdapter(new LanguageAdapter(languages, listener));
-            dialog.show();
-        });
-        LanguageAdapter.LanguageAdapterCallback listener2 = position -> {
-            textEntity.currentLang = languages.get(position);
-            binding.lang2.setText(languages.get(position).ui);
-            dialog.dismiss();
-        };
-        binding.lang2.setOnClickListener(view1 -> {
-            dialog.setContentView(R.layout.dialog_language_layout);
-            RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setAdapter(new LanguageAdapter(languages, listener2));
-            dialog.show();
-        });
+
+        date = new Date();
         binding.textArea.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -106,31 +74,21 @@ public class TranslateFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String b = "en-ru";
-                if(binding.lang1.getText().equals("Russian")){
-                    b = "ru-en";
-                }
-                if((new Date()).getTime()>date.getTime() + 200){
+                if ((new Date()).getTime() > date.getTime() + 200) {
                     date = new Date();
+                    try {
+                        translatorManager.translate(charSequence).subscribe(languageTranslation -> {
+                            binding.result.setText(languageTranslation.text.get(0));
 
-                    RxBackgroundWrapper.doInBackground(
-                        HttpService.getInstance().getHttpApi().translate(API_KEY,charSequence.toString().trim(),b,"plain","1")).subscribe(
-                        new Subscriber<LanguageTranslation>() {
-                            @Override
-                            public void onCompleted() {
+                        }, throwable -> {
 
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-
-                            @Override
-                            public void onNext(LanguageTranslation o) {
-                                binding.result.setText(o.text.get(0));
-                            }
                         });
+                        RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup("Hello","en-en")).subscribe(languageTranslation1 -> {
+
+                        });
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -140,6 +98,11 @@ public class TranslateFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
 

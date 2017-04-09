@@ -23,6 +23,22 @@ public class TextEntity implements Parcelable{
 
     }
 
+    protected TextEntity(android.os.Parcel in) {
+        currentLang = in.readParcelable(LanguageType.class.getClassLoader());
+    }
+
+    public static final Creator<TextEntity> CREATOR = new Creator<TextEntity>() {
+        @Override
+        public TextEntity createFromParcel(android.os.Parcel in) {
+            return new TextEntity(in);
+        }
+
+        @Override
+        public TextEntity[] newArray(int size) {
+            return new TextEntity[size];
+        }
+    };
+
     @Override
     public int describeContents() {
         return 0;
@@ -30,5 +46,6 @@ public class TextEntity implements Parcelable{
 
     @Override
     public void writeToParcel(android.os.Parcel parcel, int i) {
+        parcel.writeParcelable(currentLang, i);
     }
 }

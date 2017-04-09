@@ -1,43 +1,44 @@
 package com.ilya.translator;
 
-import android.os.Parcelable;
+import android.app.Dialog;
+import android.databinding.DataBindingUtil;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.ImageView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 
-import com.ilya.translator.Models.LanguageVariations;
+import com.ilya.translator.Models.PossibleLanguages;
+import com.ilya.translator.databinding.ActivityMainBinding;
 import com.ilya.translator.fragments.BookmarkFragment;
 import com.ilya.translator.fragments.SettingsFragment;
 import com.ilya.translator.fragments.TranslateFragment;
 
-import org.parceler.Parcels;
-
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
 import rx.functions.Action1;
-import rx.functions.Func1;
-
-import static com.ilya.translator.Const.API_KEY;
 
 public class MainActivity extends AppCompatActivity {
+    ActivityMainBinding binding;
+    TranslatorManager translatorManager;
 
-    ArrayList<String> languages;
+    List<LanguageType> languages;
+
+    Dialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        languages = new ArrayList<>();
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        setSupportActionBar(binding.toolbar);
 
-        BottomNavigationView bottomNavigationView =
-                (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        dialog = new Dialog(this);
+        BottomNavigationView bottomNavigationView = binding.bottomNavigation;
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             Fragment selectedFragment = null;
@@ -57,52 +58,17 @@ public class MainActivity extends AppCompatActivity {
             transaction.commit();
             return true;
         });
-        RxBackgroundWrapper.doInBackground(
-                HttpService.getInstance().getHttpApi().getLanguages(API_KEY, "en"))
-                .subscribe(languageVariations -> {
-                    languages.addAll(languageVariations.langs.values());
-                    TranslateFragment translateFragment = TranslateFragment.newInstance();
-                    Observable.just(languageVariations.langs.values())
-                            .flatMapIterable(strings -> strings)
-                            .map(LanguageType::new)
-                            .toList()
-                            .subscribe(languageTypes -> {
-                                Bundle bundle = new Bundle();
-                                ArrayList<LanguageType> arrayList = new ArrayList<LanguageType>(languageTypes);
-                                bundle.putParcelableArrayList("languages", arrayList);
-                                translateFragment.setArguments(bundle);
-                                getSupportFragmentManager().beginTransaction()
-                                        .replace(R.id.frame_layout, translateFragment)
-                                        .commit();
-                            }, throwable -> {
+        translatorManager = TranslatorManager.getInstance();
+        translatorManager.loadLanguageVariations().subscribe(possibleLanguages -> {
+            initialize();
+        }, throwable -> {
 
-                            });
-                }, throwable -> {
-
-                });
-    /*button.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-
-    RxBackgroundWrapper.doInBackground(HttpService.getInstance().getHttpApi().detect(API_KEY,"русский","")).subscribe(
-        new Subscriber<Object>() {
-          @Override
-          public void onCompleted() {
-
-          }
-
-          @Override
-          public void onError(Throwable e) {
-
-          }
-
-          @Override
-          public void onNext(Object o) {
-
-          }
         });
 
-    RxBackgroundWrapper.doInBackground(HttpService.getInstance().getHttpApi().translate(API_KEY,"русский","ru-en","plain","1")).subscribe(
+
+//region detect
+        /*
+    RxBackgroundWrapper.doInBackground(HttpService.getInstance().getTranslationApi().translate(TRANSLATION_API_KEY,"русский","ru-en","plain","1")).subscribe(
         new Subscriber<Object>() {
           @Override
           public void onCompleted() {
@@ -121,5 +87,41 @@ public class MainActivity extends AppCompatActivity {
         });
       }
     });*/
+        //endregion
+    }
+
+    private void initialize() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_layout, new TranslateFragment())
+                .commit();
+
+        languages = translatorManager.getLanguageTypes();
+        binding.lang1.setText(translatorManager.getCurrentFrom().longName);//something default
+        binding.lang2.setText(translatorManager.getCurrentTo().longName);
+        //binding.setTextEntity(textEntity);
+        LanguageAdapter.LanguageAdapterCallback listener = position -> {
+            binding.lang1.setText(languages.get(position).longName);
+            translatorManager.setCurrentFrom(languages.get(position));
+            dialog.dismiss();
+        };
+        binding.lang1.setOnClickListener(view1 -> {
+            dialog.setContentView(R.layout.dialog_language_layout);
+            RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(new LanguageAdapter(languages, listener));
+            dialog.show();
+        });
+        LanguageAdapter.LanguageAdapterCallback listener2 = position -> {
+            binding.lang2.setText(languages.get(position).longName);
+            translatorManager.setCurrentTo(languages.get(position));
+            dialog.dismiss();
+        };
+        binding.lang2.setOnClickListener(view1 -> {
+            dialog.setContentView(R.layout.dialog_language_layout);
+            RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(new LanguageAdapter(languages, listener2));
+            dialog.show();
+        });
     }
 }

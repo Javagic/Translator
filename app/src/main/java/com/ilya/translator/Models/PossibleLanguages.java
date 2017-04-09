@@ -11,7 +11,7 @@ import java.util.Map;
  * skype be3bapuahta
  * on 03.04.17 20:55.
  */
-public class LanguageVariations {
+public class PossibleLanguages {
 
   @SerializedName("dirs")
   public ArrayList<String> dirs;
