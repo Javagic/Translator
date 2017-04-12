@@ -1,14 +1,16 @@
-package com.ilya.translator;
+package com.ilya.translator.service;
 
-import com.ilya.translator.Models.LanguageTranslation;
-import com.ilya.translator.Models.PossibleLanguages;
+import com.ilya.translator.models.pojo.LanguageTranslation;
+import com.ilya.translator.models.LanguageType;
+import com.ilya.translator.models.Pair;
+import com.ilya.translator.models.pojo.PossibleLanguages;
+import com.ilya.translator.service.http.HttpService;
+import com.ilya.translator.utils.RxBackgroundWrapper;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import rx.Observable;
-
-import static com.ilya.translator.Const.TRANSLATION_API_KEY;
 
 /**
  * Created by Ilya Reznik
@@ -16,8 +18,8 @@ import static com.ilya.translator.Const.TRANSLATION_API_KEY;
  * skype be3bapuahta
  * on 08.04.17 15:54.
  */
-public class TranslatorManager {
-    private static TranslatorManager instance;
+public class TranslatorService {
+    private static TranslatorService instance;
     private PossibleLanguages possibleLanguages;
     private List<LanguageType> languageTypes;
     private List<Pair> pairs;
@@ -25,14 +27,14 @@ public class TranslatorManager {
     private LanguageType currentTo;
     private Pair currentPair;
 
-    public static TranslatorManager getInstance() {
+    public static TranslatorService getInstance() {
         if (instance == null) {
-            instance = new TranslatorManager();
+            instance = new TranslatorService();
         }
         return instance;
     }
 
-    private TranslatorManager() {
+    private TranslatorService() {
         setCurrentFrom(new LanguageType("ru","Русский"));
         setCurrentTo(new LanguageType("en","Английский"));
     }
@@ -41,7 +43,7 @@ public class TranslatorManager {
         return RxBackgroundWrapper.doInBackground(
                 HttpService.getInstance().getLanguages("en"))
                 .doOnNext(possibleLanguages1 -> {
-                    TranslatorManager.this.possibleLanguages = possibleLanguages1;
+                    TranslatorService.this.possibleLanguages = possibleLanguages1;
                     languageTypes = LanguageType.getList(possibleLanguages1.langs);
                     pairs = Pair.asList(possibleLanguages1.dirs);
                 }).doOnError(throwable -> {

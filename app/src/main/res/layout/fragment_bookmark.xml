@@ -1,15 +1,32 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context="com.ilya.translator.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <ImageView
-      android:src="@drawable/ic_bookmark"
-      android:id="@+id/img_dial"
-      android:layout_width="240dp"
-      android:layout_height="240dp"
-      android:layout_centerInParent="true"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        tools:context="com.ilya.translator.MainActivity">
 
-</RelativeLayout>
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabLayout"
+            android:background="@color/yellow"
+            app:tabSelectedTextColor="@color/vinous"
+            app:tabTextColor="@color/gray_600"
+            app:tabIndicatorColor="@color/black"
+            app:tabIndicatorHeight="3dp"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tabLayout"
+
+            >
+
+        </android.support.v4.view.ViewPager>
+
+    </RelativeLayout>
+</layout>

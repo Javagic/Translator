@@ -1,4 +1,4 @@
-package com.ilya.translator.Models;
+package com.ilya.translator.models.pojo;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -31,6 +31,9 @@ public class DictionaryModel {
         public ArrayList<TrModel> tr;
 
         public class TrModel{
+
+            public String number;
+
             @SerializedName("text")
             public String text;
 

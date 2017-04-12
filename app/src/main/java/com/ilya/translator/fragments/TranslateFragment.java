@@ -3,6 +3,7 @@ package com.ilya.translator.fragments;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -11,19 +12,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ilya.translator.HttpService;
-import com.ilya.translator.MeaningAdapter;
-import com.ilya.translator.Models.LanguageTranslation;
-import com.ilya.translator.Pair;
+import com.ilya.translator.BR;
+import com.ilya.translator.service.http.HttpService;
+import com.ilya.translator.models.pojo.DictionaryModel;
+import com.ilya.translator.models.Pair;
 import com.ilya.translator.R;
-import com.ilya.translator.RxBackgroundWrapper;
-import com.ilya.translator.TranslatorManager;
+import com.ilya.translator.utils.RecyclerBindingAdapter;
+import com.ilya.translator.utils.RxBackgroundWrapper;
+import com.ilya.translator.service.TranslatorService;
 import com.ilya.translator.databinding.FragmentTranslateBinding;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
-
-import rx.functions.Action1;
+import java.util.List;
 
 /**
  * Created by Ilya Reznik
@@ -32,11 +32,11 @@ import rx.functions.Action1;
  * on 05.04.17 20:03.
  */
 public class TranslateFragment extends Fragment {
-    TranslatorManager translatorManager;
+    TranslatorService translatorService;
     RecyclerView recyclerView;
-    MeaningAdapter meaningAdapter;
+    RecyclerBindingAdapter meaningAdapter;
     FragmentTranslateBinding binding;
-
+    List<DictionaryModel.DefModel.TrModel> trModelList;
     //private FTranslateFragment binding;
 
     public static TranslateFragment newInstance() {
@@ -47,7 +47,7 @@ public class TranslateFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        translatorManager = TranslatorManager.getInstance();
+        translatorService = TranslatorService.getInstance();
     }
 
 
@@ -61,12 +61,13 @@ public class TranslateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
+        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_translate, container, false);
         View view = binding.getRoot();
 
         recyclerView = binding.meaningRecycler;
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        meaningAdapter  = new MeaningAdapter();
+        meaningAdapter  = new RecyclerBindingAdapter<>(R.layout.item_meaning, BR.trModel, trModelList);
         recyclerView.setAdapter(meaningAdapter);
 
         binding.textArea.addTextChangedListener(new TextWatcher() {
@@ -82,18 +83,24 @@ public class TranslateFragment extends Fragment {
                 String query = charSequence.toString().trim();
                 if (" ,.;".contains(lastChar)) {
                     try {
-                        translatorManager.translate(query).subscribe(languageTranslation -> {
+                        translatorService.translate(query).subscribe(languageTranslation -> {
                             binding.result.setText(languageTranslation.text.get(0));
                             binding.defWord.setText(query);
+
                         }, throwable -> {
                         });
 
-                        String pair = Pair.pairFrom(translatorManager.getCurrentFrom(), translatorManager.getCurrentTo());
+                        String pair = Pair.pairFrom(translatorService.getCurrentFrom(), translatorService
+                            .getCurrentTo());
                         RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup(query, pair)).subscribe(defModel -> {
+                            for (int k = 0; k < defModel.tr.size(); k++) {//посмотрать трезвым
+                                defModel.tr.get(k).number = String.valueOf(k+1);
+                            }
                             binding.pos.setText(defModel.pos);
-                            meaningAdapter.setMeaningList(defModel.tr);
+                            meaningAdapter.setList(defModel.tr);
                         }, throwable -> {
-
+                            meaningAdapter.removeList();
+                            binding.pos.setText("");
                         });
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();

@@ -9,25 +9,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 
-import com.ilya.translator.Models.PossibleLanguages;
 import com.ilya.translator.databinding.ActivityMainBinding;
 import com.ilya.translator.fragments.BookmarkFragment;
 import com.ilya.translator.fragments.SettingsFragment;
 import com.ilya.translator.fragments.TranslateFragment;
+import com.ilya.translator.models.LanguageType;
+import com.ilya.translator.service.TranslatorService;
+import com.ilya.translator.utils.RecyclerBindingAdapter;
 
-import java.util.Date;
 import java.util.List;
-
-import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
-    TranslatorManager translatorManager;
-
+    TranslatorService translatorService;
+    RecyclerView recyclerView;
     List<LanguageType> languages;
-
+    RecyclerBindingAdapter<LanguageType> adapter;
     Dialog dialog;
 
     @Override
@@ -38,6 +36,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
 
         dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_language_layout);
+        recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         BottomNavigationView bottomNavigationView = binding.bottomNavigation;
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
@@ -58,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
             transaction.commit();
             return true;
         });
-        translatorManager = TranslatorManager.getInstance();
-        translatorManager.loadLanguageVariations().subscribe(possibleLanguages -> {
+        translatorService = TranslatorService.getInstance();
+        translatorService.loadLanguageVariations().subscribe(possibleLanguages -> {
             initialize();
         }, throwable -> {
 
@@ -94,33 +96,27 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frame_layout, new TranslateFragment())
                 .commit();
-
-        languages = translatorManager.getLanguageTypes();
-        binding.lang1.setText(translatorManager.getCurrentFrom().longName);//something default
-        binding.lang2.setText(translatorManager.getCurrentTo().longName);
-        //binding.setTextEntity(textEntity);
-        LanguageAdapter.LanguageAdapterCallback listener = position -> {
+        languages = translatorService.getLanguageTypes();
+        binding.lang1.setText(translatorService.getCurrentFrom().longName);//something default
+        binding.lang2.setText(translatorService.getCurrentTo().longName);
+        adapter = new RecyclerBindingAdapter<>(R.layout.item_language, BR.languageName, languages);
+        recyclerView.setAdapter(adapter);
+        RecyclerBindingAdapter.OnItemClickListener<LanguageType> listener1 = (position, item) -> {
             binding.lang1.setText(languages.get(position).longName);
-            translatorManager.setCurrentFrom(languages.get(position));
+            translatorService.setCurrentFrom(languages.get(position));
             dialog.dismiss();
         };
         binding.lang1.setOnClickListener(view1 -> {
-            dialog.setContentView(R.layout.dialog_language_layout);
-            RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(new LanguageAdapter(languages, listener));
+            adapter.setOnItemClickListener(listener1);
             dialog.show();
         });
-        LanguageAdapter.LanguageAdapterCallback listener2 = position -> {
+        RecyclerBindingAdapter.OnItemClickListener<LanguageType> listener2 = (position, item) -> {
             binding.lang2.setText(languages.get(position).longName);
-            translatorManager.setCurrentTo(languages.get(position));
+            translatorService.setCurrentTo(languages.get(position));
             dialog.dismiss();
         };
         binding.lang2.setOnClickListener(view1 -> {
-            dialog.setContentView(R.layout.dialog_language_layout);
-            RecyclerView recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(new LanguageAdapter(languages, listener2));
+            adapter.setOnItemClickListener(listener2);
             dialog.show();
         });
     }

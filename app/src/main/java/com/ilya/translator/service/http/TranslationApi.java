@@ -1,7 +1,8 @@
-package com.ilya.translator;
+package com.ilya.translator.service.http;
 
-import com.ilya.translator.Models.LanguageTranslation;
-import com.ilya.translator.Models.PossibleLanguages;
+import com.ilya.translator.models.pojo.LanguageTranslation;
+import com.ilya.translator.models.pojo.PossibleLanguages;
+import com.ilya.translator.utils.Const;
 
 import retrofit2.http.POST;
 import retrofit2.http.Query;

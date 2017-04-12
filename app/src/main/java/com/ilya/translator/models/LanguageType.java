@@ -1,4 +1,4 @@
-package com.ilya.translator;
+package com.ilya.translator.models;
 
 import android.os.Parcelable;
 

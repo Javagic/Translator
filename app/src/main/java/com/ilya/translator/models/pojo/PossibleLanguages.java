@@ -1,4 +1,4 @@
-package com.ilya.translator.Models;
+package com.ilya.translator.models.pojo;
 
 import com.google.gson.annotations.SerializedName;
 

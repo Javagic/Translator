@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <data>
+
+    <variable
+        name="languageName"
+        type="com.ilya.translator.models.LanguageType" />
+  </data>
+
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     >
   <android.support.v7.widget.CardView
@@ -19,8 +28,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="7dp"
         tools:text="language"
+        android:text="@{languageName.longName}"
         android:textSize="30dp"
         />
   </android.support.v7.widget.CardView>
 
 </RelativeLayout>
+
+</layout>

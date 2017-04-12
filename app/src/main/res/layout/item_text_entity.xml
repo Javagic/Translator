@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="textEntity"
+            type="com.ilya.translator.models.TextEntity" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/mark"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:background="@{textEntity.isMarked ? @drawable/ic_bookmark_yellow : 	@drawable/ic_bookmark_gray}"
+            tools:background="@drawable/ic_bookmark_gray" />
+
+        <TextView
+            android:id="@+id/wordFrom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="6dp"
+            android:layout_toEndOf="@id/mark"
+            android:text="@{textEntity.textFrom}"
+            tools:text="Привет" />
+
+        <TextView
+            android:id="@+id/wordTo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/wordFrom"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="3dp"
+            android:layout_toEndOf="@id/mark"
+            android:textColor="@color/gray_600"
+            android:text="@{textEntity.textTo}"
+            tools:text="Hi" />
+
+        <TextView
+            android:id="@+id/pair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:textColor="@color/gray_600"
+            android:textSize="15sp"
+            app:setLanguagePair="@{textEntity}"
+            tools:text="RU-EN"
+            />
+    </RelativeLayout>
+</layout>

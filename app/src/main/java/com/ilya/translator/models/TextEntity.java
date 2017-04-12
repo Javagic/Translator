@@ -1,11 +1,8 @@
-package com.ilya.translator;
+package com.ilya.translator.models;
 
+import android.databinding.BindingAdapter;
 import android.os.Parcelable;
-
-import org.parceler.Parcel;
-
-import java.util.ArrayList;
-import java.util.Map;
+import android.widget.TextView;
 
 /**
  * Created by Ilya Reznik
@@ -16,15 +13,18 @@ import java.util.Map;
 
 public class TextEntity implements Parcelable{
 
-    public Map<String, ArrayList<String>> meaning;
-    public LanguageType currentLang;
+    public LanguageType fromLanguage;
+    public LanguageType toLanguage;
+    public String textFrom;
+    public String textTo;
+    public boolean isMarked;
 
     public TextEntity() {
 
     }
 
     protected TextEntity(android.os.Parcel in) {
-        currentLang = in.readParcelable(LanguageType.class.getClassLoader());
+
     }
 
     public static final Creator<TextEntity> CREATOR = new Creator<TextEntity>() {
@@ -46,6 +46,7 @@ public class TextEntity implements Parcelable{
 
     @Override
     public void writeToParcel(android.os.Parcel parcel, int i) {
-        parcel.writeParcelable(currentLang, i);
+
     }
+
 }

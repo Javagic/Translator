@@ -1,4 +1,4 @@
-package com.ilya.translator;
+package com.ilya.translator.models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +42,11 @@ public class Pair {
     public static  String pairFrom(LanguageType typeFrom,LanguageType typeTo){
         return typeFrom.shortName+"-"+typeTo.shortName;
     }
+
+    public static  String pairFromUpperCase(LanguageType type,LanguageType type2){
+        return type.shortName.toUpperCase()+"-"+type2.shortName.toUpperCase();
+    }
+
     public static List<Pair> asList(List<String> list){
         List<Pair> pairs = new ArrayList<>();
         for (String s : list) {

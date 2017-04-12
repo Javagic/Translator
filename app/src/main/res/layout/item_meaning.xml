@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:padding="2dp"
-    >
-    <TextView
-        android:id="@+id/number"
-        android:layout_width="wrap_content"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="trModel"
+            type="com.ilya.translator.models.pojo.DictionaryModel.DefModel.TrModel" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="1"
-        android:padding="3dp"
-        android:textColor="@color/gray_500"
-        />
-    <TextView
-        android:id="@+id/tr_meaning"
-        tools:text="hi, hello, hallo, salutation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/number"
-        android:textColor="@color/darkBlue"
-        android:paddingStart="3dp"
-        android:paddingLeft="3dp"
-        />
-    <TextView
-        android:id="@+id/meaning"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tr_meaning"
-        android:layout_toEndOf="@+id/number"
-        tools:text="(приветствие,алло)"
-        android:textColor="@color/vinous"
-        android:paddingStart="3dp"
-        android:paddingLeft="3dp"
-        />
-</RelativeLayout>
+        android:padding="2dp">
+
+        <TextView
+            android:id="@+id/number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:textColor="@color/gray_500"
+            tools:text="@{trModel.number}" />
+
+        <TextView
+            android:id="@+id/tr_meaning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/number"
+            android:paddingLeft="3dp"
+            android:paddingStart="3dp"
+            android:textColor="@color/darkBlue"
+            app:translatedMeaning = "@{trModel}"
+            tools:text="hi, hello, hallo, salutation" />
+
+        <TextView
+            android:id="@+id/meaning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tr_meaning"
+            android:layout_toEndOf="@+id/number"
+            android:paddingLeft="3dp"
+            android:paddingStart="3dp"
+            android:textColor="@color/vinous"
+            app:meaning = "@{trModel}"
+            tools:text="(приветствие,алло)" />
+    </RelativeLayout>
+</layout>

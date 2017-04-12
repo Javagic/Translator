@@ -5,9 +5,8 @@
   <data>
     <variable
         name="textEntity"
-        type="com.ilya.translator.TextEntity" />
+        type="com.ilya.translator.models.TextEntity" />
   </data>
-
 <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"

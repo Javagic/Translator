@@ -6,7 +6,7 @@
       android:title=""/>
   <item
       android:id="@+id/action_bookmark"
-      android:icon="@drawable/ic_bookmark"
+      android:icon="@drawable/ic_bookmark_gray"
       android:title="" />
   <item
       android:id="@+id/action_settings"

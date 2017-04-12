@@ -1,4 +1,4 @@
-package com.ilya.translator;
+package com.ilya.translator.utils;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
