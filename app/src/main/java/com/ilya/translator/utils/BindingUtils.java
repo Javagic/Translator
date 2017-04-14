@@ -1,7 +1,6 @@
 package com.ilya.translator.utils;
 
 import android.databinding.BindingAdapter;
-import android.view.View;
 import android.widget.TextView;
 
 import com.ilya.translator.models.Pair;
@@ -17,11 +16,6 @@ import java.util.ArrayList;
  * on 12.04.17 19:07.
  */
 public class BindingUtils {
-
-    @BindingAdapter("setLanguagePair")
-    public static void setLanguagePair(TextView textView, TextEntity textEntity) {
-        textView.setText(Pair.pairFromUpperCase(textEntity.fromLanguage, textEntity.toLanguage));
-    }
 
     @BindingAdapter("translatedMeaning")
     public static void translatedMeaning(TextView textView,

@@ -12,9 +12,8 @@
             android:id="@+id/tabLayout"
             android:background="@color/yellow"
             app:tabSelectedTextColor="@color/vinous"
-            app:tabTextColor="@color/gray_600"
+            app:tabTextColor="@color/black"
             app:tabIndicatorColor="@color/black"
-            app:tabIndicatorHeight="3dp"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize" />
 
@@ -23,9 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tabLayout"
-
             >
-
         </android.support.v4.view.ViewPager>
 
     </RelativeLayout>

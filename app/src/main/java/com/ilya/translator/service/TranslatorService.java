@@ -8,6 +8,8 @@ import com.ilya.translator.service.http.HttpService;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
@@ -23,8 +25,8 @@ public class TranslatorService {
     private PossibleLanguages possibleLanguages;
     private List<LanguageType> languageTypes;
     private List<Pair> pairs;
-    private LanguageType currentFrom;
-    private LanguageType currentTo;
+    private LanguageType currentInput;
+    private LanguageType currentOutput;
     private Pair currentPair;
 
     public static TranslatorService getInstance() {
@@ -35,13 +37,13 @@ public class TranslatorService {
     }
 
     private TranslatorService() {
-        setCurrentFrom(new LanguageType("ru","Русский"));
-        setCurrentTo(new LanguageType("en","Английский"));
+        setCurrentInput(new LanguageType("ru","Русский"));
+        setCurrentOutput(new LanguageType("en","Английский"));
     }
 
     public Observable<PossibleLanguages> loadLanguageVariations() {
         return RxBackgroundWrapper.doInBackground(
-                HttpService.getInstance().getLanguages("en"))
+                HttpService.getInstance().getLanguages("ru"))
                 .doOnNext(possibleLanguages1 -> {
                     TranslatorService.this.possibleLanguages = possibleLanguages1;
                     languageTypes = LanguageType.getList(possibleLanguages1.langs);
@@ -60,24 +62,31 @@ public class TranslatorService {
                 HttpService.getInstance().translate( text.toString(), currentPair.toString(), "plain", "1"));
     }
 
-    public void setCurrentFrom(LanguageType currentFrom) {
-        this.currentFrom = currentFrom;
-        if (currentTo != null)
-            currentPair = new Pair(currentFrom, currentTo);
+    public void setCurrentInput(LanguageType currentInput) {
+        this.currentInput = currentInput;
+        if (currentOutput != null)
+            currentPair = new Pair(currentInput, currentOutput);
     }
 
-    public void setCurrentTo(LanguageType currentTo) {
-        this.currentTo = currentTo;
-        if (currentFrom != null)
-        currentPair = new Pair(currentFrom, currentTo);
+    public void setCurrentOutput(LanguageType currentOutput) {
+        this.currentOutput = currentOutput;
+        if (currentInput != null)
+        currentPair = new Pair(currentInput, currentOutput);
     }
 
-    public LanguageType getCurrentFrom() {
-        return currentFrom;
+    public LanguageType getCurrentInput() {
+        return currentInput;
     }
 
-    public LanguageType getCurrentTo() {
-        return currentTo;
+    public LanguageType getCurrentOutput() {
+        return currentOutput;
     }
 
+    public void swapLanguages(){
+        LanguageType languageType = new LanguageType();
+        languageType.longName = currentInput.longName;
+        languageType.shortName = currentInput.shortName;
+        currentInput = currentOutput;
+        currentOutput = languageType;
+    }
 }

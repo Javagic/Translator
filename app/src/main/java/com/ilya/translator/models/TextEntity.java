@@ -1,8 +1,6 @@
 package com.ilya.translator.models;
 
-import android.databinding.BindingAdapter;
 import android.os.Parcelable;
-import android.widget.TextView;
 
 /**
  * Created by Ilya Reznik
@@ -12,15 +10,23 @@ import android.widget.TextView;
  */
 
 public class TextEntity implements Parcelable{
-
-    public LanguageType fromLanguage;
-    public LanguageType toLanguage;
-    public String textFrom;
-    public String textTo;
+    public int id;
+    public String inputLanguage;
+    public String outputLanguage;
+    public String inputText;
+    public String outputText;
     public boolean isMarked;
 
     public TextEntity() {
 
+    }
+
+    public TextEntity(int id,String inputLanguage,String outputLanguage, String inputText,String outputText) {
+        this.id = id;
+        this.inputLanguage = inputLanguage;
+        this.outputLanguage = outputLanguage;
+        this.inputText = inputText;
+        this.outputText = outputText;
     }
 
     protected TextEntity(android.os.Parcel in) {

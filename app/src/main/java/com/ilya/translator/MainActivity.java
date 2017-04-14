@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.ilya.translator.databinding.ActivityMainBinding;
 import com.ilya.translator.fragments.BookmarkFragment;
@@ -16,6 +17,7 @@ import com.ilya.translator.fragments.SettingsFragment;
 import com.ilya.translator.fragments.TranslateFragment;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.service.TranslatorService;
+import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.RecyclerBindingAdapter;
 
 import java.util.List;
@@ -24,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     TranslatorService translatorService;
     RecyclerView recyclerView;
+    CRUDService crudService;
     List<LanguageType> languages;
     RecyclerBindingAdapter<LanguageType> adapter;
     Dialog dialog;
@@ -60,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
             transaction.commit();
             return true;
         });
-        translatorService = TranslatorService.getInstance();
+         crudService = CRUDService.getInstance(this);
+            translatorService = TranslatorService.getInstance();
         translatorService.loadLanguageVariations().subscribe(possibleLanguages -> {
             initialize();
         }, throwable -> {
@@ -96,14 +100,17 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frame_layout, new TranslateFragment())
                 .commit();
+        binding.swapLanguage.setOnClickListener(view -> {
+            translatorService.swapLanguages();
+        });
         languages = translatorService.getLanguageTypes();
-        binding.lang1.setText(translatorService.getCurrentFrom().longName);//something default
-        binding.lang2.setText(translatorService.getCurrentTo().longName);
+        binding.lang1.setText(translatorService.getCurrentInput().longName);//something default
+        binding.lang2.setText(translatorService.getCurrentOutput().longName);
         adapter = new RecyclerBindingAdapter<>(R.layout.item_language, BR.languageName, languages);
         recyclerView.setAdapter(adapter);
         RecyclerBindingAdapter.OnItemClickListener<LanguageType> listener1 = (position, item) -> {
             binding.lang1.setText(languages.get(position).longName);
-            translatorService.setCurrentFrom(languages.get(position));
+            translatorService.setCurrentInput(languages.get(position));
             dialog.dismiss();
         };
         binding.lang1.setOnClickListener(view1 -> {
@@ -112,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         });
         RecyclerBindingAdapter.OnItemClickListener<LanguageType> listener2 = (position, item) -> {
             binding.lang2.setText(languages.get(position).longName);
-            translatorService.setCurrentTo(languages.get(position));
+            translatorService.setCurrentOutput(languages.get(position));
             dialog.dismiss();
         };
         binding.lang2.setOnClickListener(view1 -> {

@@ -13,10 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.BR;
+import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.service.http.HttpService;
 import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.Pair;
 import com.ilya.translator.R;
+import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.RecyclerBindingAdapter;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 import com.ilya.translator.service.TranslatorService;
@@ -34,10 +36,11 @@ import java.util.List;
 public class TranslateFragment extends Fragment {
     TranslatorService translatorService;
     RecyclerView recyclerView;
-    RecyclerBindingAdapter meaningAdapter;
+    RecyclerBindingAdapter<DictionaryModel.DefModel.TrModel> meaningAdapter;
     FragmentTranslateBinding binding;
     List<DictionaryModel.DefModel.TrModel> trModelList;
-    //private FTranslateFragment binding;
+    CRUDService crudService;
+    TextEntity textEntity;
 
     public static TranslateFragment newInstance() {
         TranslateFragment fragment = new TranslateFragment();
@@ -46,15 +49,16 @@ public class TranslateFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        textEntity = new TextEntity();
         super.onCreate(savedInstanceState);
         translatorService = TranslatorService.getInstance();
+        crudService = CRUDService.getInstance(getActivity());
     }
 
 
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        //textEntity = args.getParcelable("textEntity");
     }
 
     @Override
@@ -84,16 +88,21 @@ public class TranslateFragment extends Fragment {
                 if (" ,.;".contains(lastChar)) {
                     try {
                         translatorService.translate(query).subscribe(languageTranslation -> {
+                            TextEntity textEntity = new TextEntity();
+                            textEntity.outputText = languageTranslation.text.get(0);
+                            textEntity.inputText = query;
+                            textEntity.inputLanguage = translatorService.getCurrentInput().shortName;
+                            textEntity.outputLanguage = translatorService.getCurrentOutput().shortName;
                             binding.result.setText(languageTranslation.text.get(0));
                             binding.defWord.setText(query);
-
+                            crudService.addTextEntity(textEntity);
                         }, throwable -> {
                         });
 
-                        String pair = Pair.pairFrom(translatorService.getCurrentFrom(), translatorService
-                            .getCurrentTo());
+                        String pair = Pair.pairFrom(translatorService.getCurrentInput(), translatorService
+                            .getCurrentOutput());
                         RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup(query, pair)).subscribe(defModel -> {
-                            for (int k = 0; k < defModel.tr.size(); k++) {//посмотрать трезвым
+                            for (int k = 0; k < defModel.tr.size(); k++) {
                                 defModel.tr.get(k).number = String.valueOf(k+1);
                             }
                             binding.pos.setText(defModel.pos);

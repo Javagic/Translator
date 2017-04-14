@@ -31,7 +31,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="6dp"
             android:layout_toEndOf="@id/mark"
-            android:text="@{textEntity.textFrom}"
+            android:text="@{textEntity.inputText}"
             tools:text="Привет" />
 
         <TextView
@@ -43,7 +43,7 @@
             android:layout_marginTop="3dp"
             android:layout_toEndOf="@id/mark"
             android:textColor="@color/gray_600"
-            android:text="@{textEntity.textTo}"
+            android:text="@{textEntity.outputText}"
             tools:text="Hi" />
 
         <TextView
@@ -55,8 +55,7 @@
             android:layout_marginTop="15dp"
             android:textColor="@color/gray_600"
             android:textSize="15sp"
-            app:setLanguagePair="@{textEntity}"
-            tools:text="RU-EN"
+            android:text="@{textEntity.inputLanguage +'-'+textEntity.outputLanguage}"
             />
     </RelativeLayout>
 </layout>

@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.R;
-import com.ilya.translator.databinding.FragmentBookmarkBinding;
+import com.ilya.translator.databinding.FBookmarkBinding;
 
 /**
  * Created by Ilya Reznik
@@ -21,7 +21,7 @@ import com.ilya.translator.databinding.FragmentBookmarkBinding;
  * on 05.04.17 20:05.
  */
 public class BookmarkFragment extends Fragment {
-  FragmentBookmarkBinding binding;
+  FBookmarkBinding binding;
   ViewPager viewPager;
   public static BookmarkFragment newInstance() {
     BookmarkFragment fragment = new BookmarkFragment();
@@ -37,7 +37,7 @@ public class BookmarkFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
-    binding = DataBindingUtil.inflate(inflater, R.layout.fragment_bookmark, container, false);
+    binding = DataBindingUtil.inflate(inflater, R.layout.f_bookmark, container, false);
     viewPager = binding.viewPager;
     TabLayout tabLayout = binding.tabLayout;
     Fragment[] fragments = {
