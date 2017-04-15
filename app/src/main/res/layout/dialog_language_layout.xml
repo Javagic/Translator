@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
     android:minHeight="180dp"
     android:minWidth="200dp"
+    android:background="@color/white"
     >
 
   <TextView
@@ -21,6 +21,8 @@
       android:layout_height="wrap_content"
       android:layout_below="@+id/translate_from"
       android:id="@+id/language_recycler"
+      android:scrollbarThumbVertical="@drawable/scrollbar_background"
+      android:scrollbars="vertical"
       >
 
   </android.support.v7.widget.RecyclerView>

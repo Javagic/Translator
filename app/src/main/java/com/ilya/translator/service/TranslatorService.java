@@ -1,15 +1,22 @@
 package com.ilya.translator.service;
 
+import android.util.Log;
+
+import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.pojo.LanguageTranslation;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.pojo.PossibleLanguages;
 import com.ilya.translator.service.http.HttpService;
+import com.ilya.translator.utils.CRUDService;
+import com.ilya.translator.utils.Const;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import rx.Observable;
@@ -22,7 +29,6 @@ import rx.Observable;
  */
 public class TranslatorService {
     private static TranslatorService instance;
-    private PossibleLanguages possibleLanguages;
     private List<LanguageType> languageTypes;
     private List<Pair> pairs;
     private LanguageType currentInput;
@@ -37,19 +43,18 @@ public class TranslatorService {
     }
 
     private TranslatorService() {
-        setCurrentInput(new LanguageType("ru","Русский"));
-        setCurrentOutput(new LanguageType("en","Английский"));
+        setCurrentInput(new LanguageType("ru", "Русский"));
+        setCurrentOutput(new LanguageType("en", "Английский"));
     }
 
     public Observable<PossibleLanguages> loadLanguageVariations() {
         return RxBackgroundWrapper.doInBackground(
                 HttpService.getInstance().getLanguages("ru"))
                 .doOnNext(possibleLanguages1 -> {
-                    TranslatorService.this.possibleLanguages = possibleLanguages1;
                     languageTypes = LanguageType.getList(possibleLanguages1.langs);
                     pairs = Pair.asList(possibleLanguages1.dirs);
                 }).doOnError(throwable -> {
-
+                    Log.i(Const.MY_LOG,"error getlangs internet " + throwable.getMessage() + throwable.getClass());
                 });
     }
 
@@ -57,20 +62,31 @@ public class TranslatorService {
         return languageTypes;
     }
 
+    public Observable<DictionaryModel.DefModel> lookup(String query) {
+        String pair = Pair.pairFrom(getCurrentInput(), getCurrentOutput());
+        Log.i(Const.MY_LOG, "lookup: " + query + " " + pair, null);
+        return RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup(query, pair));
+    }
+
     public Observable<LanguageTranslation> translate(CharSequence text) throws UnsupportedEncodingException {
+        Log.i(Const.MY_LOG, "translate: " + text.toString() + " " + currentPair.toString(), null);
         return RxBackgroundWrapper.doInBackground(
-                HttpService.getInstance().translate( text.toString(), currentPair.toString(), "plain", "1"));
+                HttpService.getInstance().translate(text.toString(), currentPair.toString(), "plain", "1"));
     }
 
     public void setCurrentInput(LanguageType currentInput) {
         this.currentInput = currentInput;
         if (currentOutput != null)
-            currentPair = new Pair(currentInput, currentOutput);
+            makePair();
     }
 
     public void setCurrentOutput(LanguageType currentOutput) {
         this.currentOutput = currentOutput;
         if (currentInput != null)
+            makePair();
+    }
+
+    private void makePair() {
         currentPair = new Pair(currentInput, currentOutput);
     }
 
@@ -82,11 +98,17 @@ public class TranslatorService {
         return currentOutput;
     }
 
-    public void swapLanguages(){
+    public void swapLanguages() {
         LanguageType languageType = new LanguageType();
         languageType.longName = currentInput.longName;
         languageType.shortName = currentInput.shortName;
         currentInput = currentOutput;
         currentOutput = languageType;
+        makePair();
     }
+
+    public void setLanguageTypes(List<LanguageType> languageTypes) {
+        this.languageTypes = languageTypes;
+    }
+
 }

@@ -62,6 +62,9 @@ public class HistoryFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         Drawable divider = ContextCompat.getDrawable(getActivity(), R.drawable.item_divider_bottom);
         recyclerView.addItemDecoration(new ItemDecorator(divider));
+        textEntitiesAdapter.setOnItemClickListener((position, item) -> {
+            ((MainActivity) getActivity()).setTranslateFragment(item);
+        });
         return view;
     }
 

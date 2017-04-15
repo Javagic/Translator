@@ -11,8 +11,10 @@
       android:id="@+id/history_recycler"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-
+      android:scrollbarThumbVertical="@drawable/scrollbar_background"
       tools:listitem="@layout/item_text_entity"
+      android:scrollbars="vertical"
+      android:scrollbarSize="10dp"
      />
 </LinearLayout>
   </layout>

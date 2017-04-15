@@ -48,8 +48,10 @@ public class RecyclerBindingAdapter<T> extends RecyclerView.Adapter<RecyclerBind
     }
 
     public void removeList() {
-        this.items.clear();
-        notifyDataSetChanged();
+        if (this.items != null) {
+            this.items.clear();
+            notifyDataSetChanged();
+        }
     }
 
     @Override

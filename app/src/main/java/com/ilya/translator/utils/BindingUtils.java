@@ -1,8 +1,13 @@
 package com.ilya.translator.utils;
 
 import android.databinding.BindingAdapter;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ilya.translator.R;
 import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
@@ -25,15 +30,16 @@ public class BindingUtils {
             stringBuilder.append(", ");
             stringBuilder.append(buildMeaning(trModel.similar));
         }
-        textView.setText(stringBuilder.toString().substring(0, stringBuilder.length() - 2));
+        textView.setText(stringBuilder.toString());
     }
 
     @BindingAdapter("meaning")
     public static void meaning(TextView textView,
                                DictionaryModel.DefModel.TrModel trModel) {
         if (trModel.mean != null) {
-            textView.setText("(" + buildMeaning(trModel.mean) +")");
+            textView.setText("(" + buildMeaning(trModel.mean) + ")");
         }
+        else textView.setVisibility(View.GONE);
     }
 
     private static String buildMeaning(ArrayList<DictionaryModel.DefModel.TrModel> list) {

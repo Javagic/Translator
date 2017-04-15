@@ -31,7 +31,7 @@
             android:paddingLeft="3dp"
             android:paddingStart="3dp"
             android:textColor="@color/darkBlue"
-            app:translatedMeaning = "@{trModel}"
+            app:translatedMeaning="@{trModel}"
             tools:text="hi, hello, hallo, salutation" />
 
         <TextView
@@ -43,7 +43,7 @@
             android:paddingLeft="3dp"
             android:paddingStart="3dp"
             android:textColor="@color/vinous"
-            app:meaning = "@{trModel}"
+            app:meaning="@{trModel}"
             tools:text="(приветствие,алло)" />
     </RelativeLayout>
 </layout>

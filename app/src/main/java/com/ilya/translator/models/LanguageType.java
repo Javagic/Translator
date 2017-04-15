@@ -3,6 +3,8 @@ package com.ilya.translator.models;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,7 @@ import java.util.Map;
  * on 06.04.17 21:16.
  */
 public class   LanguageType implements Parcelable {
+  public long id;
   public  String shortName;//короткое название
   public  String longName;//длинное  название
 
@@ -53,12 +56,14 @@ public class   LanguageType implements Parcelable {
     parcel.writeString(shortName);
   }
 
+
   public static List<LanguageType> getList(Map<String,String> map){
-    List<LanguageType> list = new ArrayList<>();
+    List<LanguageType> languageTypes = new ArrayList<>();
     for (String s : map.keySet()) {
-      list.add(new LanguageType(s,map.get(s)));
+      languageTypes.add(new LanguageType(s,map.get(s)));
     }
-    return list;
+    Collections.sort(languageTypes, (lang1, lang2) -> lang1.longName.compareToIgnoreCase(lang2.longName));
+    return languageTypes;
   }
 
 

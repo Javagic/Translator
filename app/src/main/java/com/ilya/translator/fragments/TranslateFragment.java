@@ -8,11 +8,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.BR;
+import com.ilya.translator.MainActivity;
+import com.ilya.translator.databinding.FTranslateBinding;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.service.http.HttpService;
 import com.ilya.translator.models.pojo.DictionaryModel;
@@ -22,7 +25,6 @@ import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.RecyclerBindingAdapter;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 import com.ilya.translator.service.TranslatorService;
-import com.ilya.translator.databinding.FragmentTranslateBinding;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -37,7 +39,7 @@ public class TranslateFragment extends Fragment {
     TranslatorService translatorService;
     RecyclerView recyclerView;
     RecyclerBindingAdapter<DictionaryModel.DefModel.TrModel> meaningAdapter;
-    FragmentTranslateBinding binding;
+    FTranslateBinding binding;
     List<DictionaryModel.DefModel.TrModel> trModelList;
     CRUDService crudService;
     TextEntity textEntity;
@@ -49,7 +51,6 @@ public class TranslateFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        textEntity = new TextEntity();
         super.onCreate(savedInstanceState);
         translatorService = TranslatorService.getInstance();
         crudService = CRUDService.getInstance(getActivity());
@@ -59,6 +60,9 @@ public class TranslateFragment extends Fragment {
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
+        if (args.containsKey("textEntity")) {
+            textEntity = args.getParcelable("textEntity");
+        } else textEntity = new TextEntity();
     }
 
     @Override
@@ -66,18 +70,23 @@ public class TranslateFragment extends Fragment {
                              ViewGroup container,
                              Bundle savedInstanceState) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().show();
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_translate, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.f_translate, container, false);
         View view = binding.getRoot();
-
+        binding.setTranslationTextEntity(textEntity);
         recyclerView = binding.meaningRecycler;
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        meaningAdapter  = new RecyclerBindingAdapter<>(R.layout.item_meaning, BR.trModel, trModelList);
+        meaningAdapter = new RecyclerBindingAdapter<>(R.layout.item_meaning, BR.trModel, trModelList);
         recyclerView.setAdapter(meaningAdapter);
-
+        binding.textArea.setText(textEntity.inputText);
+        binding.addFavorite.setOnClickListener(view1 -> {
+            textEntity.isMarked = !textEntity.isMarked;
+//            binding.(BR.translationTextEntity);
+            crudService.updateTextEntity(textEntity);
+            binding.setTranslationTextEntity(textEntity);
+        });
         binding.textArea.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -88,28 +97,28 @@ public class TranslateFragment extends Fragment {
                 if (" ,.;".contains(lastChar)) {
                     try {
                         translatorService.translate(query).subscribe(languageTranslation -> {
-                            TextEntity textEntity = new TextEntity();
                             textEntity.outputText = languageTranslation.text.get(0);
                             textEntity.inputText = query;
                             textEntity.inputLanguage = translatorService.getCurrentInput().shortName;
                             textEntity.outputLanguage = translatorService.getCurrentOutput().shortName;
-                            binding.result.setText(languageTranslation.text.get(0));
-                            binding.defWord.setText(query);
-                            crudService.addTextEntity(textEntity);
+                            textEntity.id =
+                                    crudService.addTextEntity(textEntity);
+                            binding.setTranslationTextEntity(textEntity);
                         }, throwable -> {
                         });
 
-                        String pair = Pair.pairFrom(translatorService.getCurrentInput(), translatorService
-                            .getCurrentOutput());
-                        RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup(query, pair)).subscribe(defModel -> {
+
+                        translatorService.lookup(query).subscribe(defModel -> {
                             for (int k = 0; k < defModel.tr.size(); k++) {
-                                defModel.tr.get(k).number = String.valueOf(k+1);
+                                defModel.tr.get(k).number = String.valueOf(k + 1);
                             }
-                            binding.pos.setText(defModel.pos);
+                            textEntity.pos = defModel.pos;
                             meaningAdapter.setList(defModel.tr);
+                            binding.setTranslationTextEntity(textEntity);
                         }, throwable -> {
                             meaningAdapter.removeList();
-                            binding.pos.setText("");
+                            textEntity.pos = "";
+                            binding.setTranslationTextEntity(textEntity);
                         });
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -125,10 +134,12 @@ public class TranslateFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    private void initRecycler(){
+
     }
-
-
+    @Override
+    public void onStop() {
+        super.onStop();
+        ((MainActivity) getActivity()).textEntity = new TextEntity(textEntity);
+    }
 }
