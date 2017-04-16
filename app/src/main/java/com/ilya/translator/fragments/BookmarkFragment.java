@@ -36,7 +36,6 @@ public class BookmarkFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
-    ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
     binding = DataBindingUtil.inflate(inflater, R.layout.f_bookmark, container, false);
     viewPager = binding.viewPager;
     TabLayout tabLayout = binding.tabLayout;

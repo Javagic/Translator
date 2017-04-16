@@ -34,12 +34,7 @@ import static com.ilya.translator.utils.Const.Prefs.GET_LANGS;
 public class MainActivity extends AppCompatActivity {
     AMainBinding binding;
     TranslatorService translatorService;
-    RecyclerView recyclerView;
     CRUDService crudService;
-    List<LanguageType> languages;
-    RecyclerBindingAdapter<LanguageType> adapter;
-    Dialog dialog;
-    public TextEntity textEntity;
     BottomNavigationView bottomNavigationView;
 
     @Override
@@ -47,23 +42,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_main);
         binding = DataBindingUtil.setContentView(this, R.layout.a_main);
-        setSupportActionBar(binding.toolbar);
-        dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_language_layout);
-        recyclerView = (RecyclerView) dialog.findViewById(R.id.language_recycler);
-        textEntity = new TextEntity();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         bottomNavigationView = binding.bottomNavigation;
-
+        crudService = CRUDService.getInstance(this);
+        translatorService = TranslatorService.getInstance();
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             switch (item.getItemId()) {
                 case R.id.action_lang:
                     selectedFragment = TranslateFragment.newInstance();
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable("textEntity", textEntity);
-                    selectedFragment.setArguments(bundle);
                     break;
                 case R.id.action_bookmark:
                     selectedFragment = BookmarkFragment.newInstance();
@@ -77,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
             transaction.commit();
             return true;
         });
-        crudService = CRUDService.getInstance(this);
-        translatorService = TranslatorService.getInstance();
         SharedPreferences prefs = getSharedPreferences(APP_PREFS, MODE_PRIVATE);
 
         if (!prefs.getBoolean(GET_LANGS, false)) {
@@ -87,7 +71,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(Const.MY_LOG, "getlangs loaded");
 
                 crudService.addLanguageTypes(translatorService.getLanguageTypes());
-                initialize();
+
+                TranslateFragment translateFragment = TranslateFragment.newInstance();//init
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frame_layout, translateFragment)
+                        .commit();
+
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putBoolean(GET_LANGS, true);
                 editor.apply();
@@ -102,10 +91,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.i(Const.MY_LOG, "local getlangs");
             translatorService.setLanguageTypes(crudService.getLanguageTypeList());
-            initialize();
+            TranslateFragment translateFragment = TranslateFragment.newInstance();//init
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frame_layout, translateFragment)
+                    .commit();
         }
-
-
 //region detect
         /*
     RxBackgroundWrapper.doInBackground(HttpService.getInstance().getTranslationApi().translate(TRANSLATION_API_KEY,"русский","ru-en","plain","1")).subscribe(
@@ -130,44 +120,7 @@ public class MainActivity extends AppCompatActivity {
         //endregion
     }
 
-    private void initialize() { //TODO: отрефачить
-        setTranslateFragment(textEntity);
-        binding.swapLanguage.setOnClickListener(view -> {
-            translatorService.swapLanguages();
-            binding.lang1.setText(translatorService.getCurrentInput().longName);
-            binding.lang2.setText(translatorService.getCurrentOutput().longName);
-
-        });
-        languages = translatorService.getLanguageTypes();
-        binding.lang1.setText(translatorService.getCurrentInput().longName);//something default
-        binding.lang2.setText(translatorService.getCurrentOutput().longName);
-        adapter = new RecyclerBindingAdapter<>(R.layout.item_language, BR.languageName, languages);
-        recyclerView.setAdapter(adapter);
-        RecyclerBindingAdapter.OnItemClickListener<LanguageType> listener1 = (position, item) -> {
-            binding.lang1.setText(languages.get(position).longName);
-            translatorService.setCurrentInput(languages.get(position));
-            dialog.dismiss();
-        };
-        binding.lang1.setOnClickListener(view1 -> {
-            adapter.setOnItemClickListener(listener1);
-            dialog.show();
-        });
-        RecyclerBindingAdapter.OnItemClickListener<LanguageType> listener2 = (position, item) -> {
-            binding.lang2.setText(languages.get(position).longName);
-            translatorService.setCurrentOutput(languages.get(position));
-            dialog.dismiss();
-        };
-        binding.lang2.setOnClickListener(view1 -> {
-            adapter.setOnItemClickListener(listener2);
-            dialog.show();
-        });
-    }
-
-    private void saveLangs() {
-
-    }
-
-    public  void setTranslateFragment(TextEntity textEntity){
+    public void setTranslateFragment(TextEntity textEntity) {
         TranslateFragment translateFragment = TranslateFragment.newInstance();
         Bundle bundle = new Bundle();
         bundle.putParcelable("textEntity", textEntity);
@@ -176,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.frame_layout, translateFragment)
                 .commit();
     }
+
     @Override
     protected void onResume() {
         super.onResume();

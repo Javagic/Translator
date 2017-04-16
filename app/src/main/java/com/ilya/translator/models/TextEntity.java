@@ -19,8 +19,8 @@ public class TextEntity implements Parcelable {
     public String pos;//part of speech
 
     public TextEntity() {
-
     }
+
 
     public TextEntity(int id, String inputLanguage, String outputLanguage, String inputText, String outputText, String pos) {
         this.id = id;

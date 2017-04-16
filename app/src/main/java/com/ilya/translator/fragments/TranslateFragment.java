@@ -16,18 +16,24 @@ import android.view.ViewGroup;
 import com.ilya.translator.BR;
 import com.ilya.translator.MainActivity;
 import com.ilya.translator.databinding.FTranslateBinding;
+import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.service.http.HttpService;
 import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.Pair;
 import com.ilya.translator.R;
 import com.ilya.translator.utils.CRUDService;
+import com.ilya.translator.utils.LanguageDialog;
 import com.ilya.translator.utils.RecyclerBindingAdapter;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 import com.ilya.translator.service.TranslatorService;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.ilya.translator.utils.LanguageDialog.FROM;
+import static com.ilya.translator.utils.LanguageDialog.TO;
 
 /**
  * Created by Ilya Reznik
@@ -35,7 +41,7 @@ import java.util.List;
  * skype be3bapuahta
  * on 05.04.17 20:03.
  */
-public class TranslateFragment extends Fragment {
+public class TranslateFragment extends Fragment implements TextWatcher {
     TranslatorService translatorService;
     RecyclerView recyclerView;
     RecyclerBindingAdapter<DictionaryModel.DefModel.TrModel> meaningAdapter;
@@ -43,6 +49,7 @@ public class TranslateFragment extends Fragment {
     List<DictionaryModel.DefModel.TrModel> trModelList;
     CRUDService crudService;
     TextEntity textEntity;
+    List<LanguageType> languageList;
 
     public static TranslateFragment newInstance() {
         TranslateFragment fragment = new TranslateFragment();
@@ -54,6 +61,7 @@ public class TranslateFragment extends Fragment {
         super.onCreate(savedInstanceState);
         translatorService = TranslatorService.getInstance();
         crudService = CRUDService.getInstance(getActivity());
+        textEntity = translatorService.textEntity;
     }
 
 
@@ -69,9 +77,8 @@ public class TranslateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
-        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         binding = DataBindingUtil.inflate(inflater, R.layout.f_translate, container, false);
-        View view = binding.getRoot();
+        View rootView = binding.getRoot();
         binding.setTranslationTextEntity(textEntity);
         recyclerView = binding.meaningRecycler;
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -84,62 +91,83 @@ public class TranslateFragment extends Fragment {
             crudService.updateTextEntity(textEntity);
             binding.setTranslationTextEntity(textEntity);
         });
-        binding.textArea.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+        binding.textArea.addTextChangedListener(this);
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().isEmpty()) return;
-                String lastChar = charSequence.toString().substring(charSequence.length() - 1);
-                String query = charSequence.toString().trim();
-                if (" ,.;".contains(lastChar)) {
-                    try {
-                        translatorService.translate(query).subscribe(languageTranslation -> {
-                            textEntity.outputText = languageTranslation.text.get(0);
-                            textEntity.inputText = query;
-                            textEntity.inputLanguage = translatorService.getCurrentInput().shortName;
-                            textEntity.outputLanguage = translatorService.getCurrentOutput().shortName;
-                            textEntity.id =
-                                    crudService.addTextEntity(textEntity);
-                            binding.setTranslationTextEntity(textEntity);
-                        }, throwable -> {
-                        });
-
-
-                        translatorService.lookup(query).subscribe(defModel -> {
-                            for (int k = 0; k < defModel.tr.size(); k++) {
-                                defModel.tr.get(k).number = String.valueOf(k + 1);
-                            }
-                            textEntity.pos = defModel.pos;
-                            meaningAdapter.setList(defModel.tr);
-                            binding.setTranslationTextEntity(textEntity);
-                        }, throwable -> {
-                            meaningAdapter.removeList();
-                            textEntity.pos = "";
-                            binding.setTranslationTextEntity(textEntity);
-                        });
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-        return view;
+        languageList = translatorService.getLanguageTypes();
+        initToolbar();
+        return rootView;
     }
 
-    private void initRecycler(){
-
-    }
     @Override
-    public void onStop() {
-        super.onStop();
-        ((MainActivity) getActivity()).textEntity = new TextEntity(textEntity);
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        if (charSequence.toString().isEmpty()) return;
+        String lastChar = charSequence.toString().substring(charSequence.length() - 1);
+        String query = charSequence.toString().trim();
+        if (" ,.;".contains(lastChar)) {
+            try {
+                translatorService.translate(query).subscribe(languageTranslation -> {
+                    textEntity.outputText = languageTranslation.text.get(0);
+                    textEntity.inputText = query;
+                    textEntity.inputLanguage = translatorService.getCurrentInput().shortName;
+                    textEntity.outputLanguage = translatorService.getCurrentOutput().shortName;
+                    textEntity.id =
+                            crudService.addTextEntity(textEntity);
+                    binding.setTranslationTextEntity(textEntity);
+                }, throwable -> {
+                });
+
+
+                translatorService.lookup(query).subscribe(defModel -> {
+                    for (int k = 0; k < defModel.tr.size(); k++) {
+                        defModel.tr.get(k).number = String.valueOf(k + 1);
+                    }
+                    textEntity.pos = defModel.pos;
+                    meaningAdapter.setList(defModel.tr);
+                    binding.setTranslationTextEntity(textEntity);
+                }, throwable -> {
+                    meaningAdapter.removeList();
+                    textEntity.pos = "";
+                    binding.setTranslationTextEntity(textEntity);
+                });
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+
+    }
+
+    private void initToolbar() {
+        binding.swapLanguage.setOnClickListener(view -> {
+            translatorService.swapLanguages();
+            binding.setTranslationTextEntity(textEntity);
+        });
+
+        binding.lang1.setOnClickListener(view -> {
+            (new LanguageDialog(getContext()))
+                    .setLanguageList(languageList)
+                    .setTitle(FROM)
+                    .setLanguageClickListener((position, item) -> {
+                        binding.lang1.setText(item.longName);
+                        translatorService.setCurrentInput(item);
+                    }).show();
+        });
+
+        binding.lang2.setOnClickListener(view -> {
+            (new LanguageDialog(getContext()))
+                    .setLanguageList(languageList)
+                    .setTitle(TO)
+                    .setLanguageClickListener((position, item) -> {
+                        binding.lang2.setText(item.longName);
+                        translatorService.setCurrentOutput(item);
+                    }).show();
+        });
     }
 }

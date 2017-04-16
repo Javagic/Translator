@@ -1,10 +1,12 @@
 package com.ilya.translator.fragments;
 
+import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -47,7 +49,6 @@ public class HistoryFragment extends Fragment {
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        //textEntity = args.getParcelable("textEntity");
     }
 
     @Override
@@ -64,6 +65,16 @@ public class HistoryFragment extends Fragment {
         recyclerView.addItemDecoration(new ItemDecorator(divider));
         textEntitiesAdapter.setOnItemClickListener((position, item) -> {
             ((MainActivity) getActivity()).setTranslateFragment(item);
+        });
+        textEntitiesAdapter.setOnLongItemClickListener((position, item) -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setPositiveButton("Удалить перевод?", (dialogInterface, i) -> {
+                textEntitiesAdapter.notifyItemRemoved(position);
+                //доделать
+            }
+            );
+            builder.setOnCancelListener(dialogInterface -> {
+            });
         });
         return view;
     }

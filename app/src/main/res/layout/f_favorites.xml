@@ -15,6 +15,7 @@
             tools:listitem="@layout/item_text_entity"
             android:scrollbars="vertical"
             android:scrollbarSize="10dp"
+            android:overScrollMode="never"
             />
     </LinearLayout>
 </layout>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="180dp"
@@ -10,7 +10,7 @@
     >
 
   <TextView
-      android:id="@+id/translate_from"
+      android:id="@+id/text"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/translate_from"
@@ -19,7 +19,7 @@
   <android.support.v7.widget.RecyclerView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_below="@+id/translate_from"
+      android:layout_below="@+id/text"
       android:id="@+id/language_recycler"
       android:scrollbarThumbVertical="@drawable/scrollbar_background"
       android:scrollbars="vertical"
@@ -27,3 +27,4 @@
 
   </android.support.v7.widget.RecyclerView>
 </RelativeLayout>
+  </layout>

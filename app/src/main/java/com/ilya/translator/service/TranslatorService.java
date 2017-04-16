@@ -2,6 +2,7 @@ package com.ilya.translator.service;
 
 import android.util.Log;
 
+import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.pojo.LanguageTranslation;
 import com.ilya.translator.models.LanguageType;
@@ -34,6 +35,7 @@ public class TranslatorService {
     private LanguageType currentInput;
     private LanguageType currentOutput;
     private Pair currentPair;
+    public TextEntity textEntity;
 
     public static TranslatorService getInstance() {
         if (instance == null) {
@@ -43,8 +45,11 @@ public class TranslatorService {
     }
 
     private TranslatorService() {
+        textEntity = new TextEntity();
         setCurrentInput(new LanguageType("ru", "Русский"));
         setCurrentOutput(new LanguageType("en", "Английский"));
+        textEntity.inputLanguage = currentInput.shortName;
+        textEntity.outputLanguage = currentOutput.shortName;
     }
 
     public Observable<PossibleLanguages> loadLanguageVariations() {
@@ -98,13 +103,18 @@ public class TranslatorService {
         return currentOutput;
     }
 
-    public void swapLanguages() {
+    public void swapLanguages() {//TODO:поменять также сущность
         LanguageType languageType = new LanguageType();
         languageType.longName = currentInput.longName;
         languageType.shortName = currentInput.shortName;
         currentInput = currentOutput;
         currentOutput = languageType;
         makePair();
+        textEntity.inputLanguage = currentInput.shortName;
+        textEntity.outputLanguage = currentOutput.shortName;
+        String inputText = textEntity.inputText;
+        textEntity.inputText = textEntity.outputText;
+        textEntity.outputText = inputText;
     }
 
     public void setLanguageTypes(List<LanguageType> languageTypes) {
