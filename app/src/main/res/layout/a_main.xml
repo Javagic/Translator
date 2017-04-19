@@ -10,7 +10,9 @@
         android:id="@+id/activity_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.ilya.translator.MainActivity">
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        tools:context="com.ilya.translator.main.MainActivity">
 
         <android.support.design.widget.BottomNavigationView
             android:id="@+id/bottom_navigation"

@@ -1,6 +1,5 @@
 package com.ilya.translator.fragments;
 
-import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -9,17 +8,18 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.BR;
-import com.ilya.translator.MainActivity;
+import com.ilya.translator.main.MainActivity;
 import com.ilya.translator.R;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.utils.CRUDService;
-import com.ilya.translator.utils.ItemDecorator;
-import com.ilya.translator.utils.RecyclerBindingAdapter;
+import com.ilya.translator.utils.adapter.ItemDecorator;
+import com.ilya.translator.utils.adapter.RecyclerBindingAdapter;
 import com.ilya.translator.databinding.FHistoryBinding;
 
 /**
@@ -28,11 +28,12 @@ import com.ilya.translator.databinding.FHistoryBinding;
  * skype be3bapuahta
  * on 10.04.17 19:50.
  */
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements SearchView.OnQueryTextListener {
     FHistoryBinding binding;
     CRUDService crudService;
     RecyclerView recyclerView;
     RecyclerBindingAdapter<TextEntity> textEntitiesAdapter;
+    SearchView searchView;
 
     public static HistoryFragment newInstance() {
         HistoryFragment fragment = new HistoryFragment();
@@ -69,19 +70,37 @@ public class HistoryFragment extends Fragment {
         textEntitiesAdapter.setOnLongItemClickListener((position, item) -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setPositiveButton("Удалить перевод?", (dialogInterface, i) -> {
-                textEntitiesAdapter.notifyItemRemoved(position);
-                //доделать
-            }
+                        textEntitiesAdapter.notifyItemRemoved(position);
+                        //доделать
+                    }
             );
             builder.setOnCancelListener(dialogInterface -> {
             });
+            builder.show();
         });
+        searchView = binding.searchView;
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(this);
+        searchView.onActionViewExpanded();
+
         return view;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+    }
+
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        textEntitiesAdapter.setList(CRUDService.getInstance(getContext()).searchHistory(newText.trim()));
+        return false;
     }
 
 

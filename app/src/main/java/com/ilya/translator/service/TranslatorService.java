@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import rx.Observable;
+import rx.functions.Action1;
 
 /**
  * Created by Ilya Reznik
@@ -53,8 +54,7 @@ public class TranslatorService {
     }
 
     public Observable<PossibleLanguages> loadLanguageVariations() {
-        return RxBackgroundWrapper.doInBackground(
-                HttpService.getInstance().getLanguages("ru"))
+        return HttpService.getInstance().getLanguages("ru").compose(RxBackgroundWrapper.applySchedulers())
                 .doOnNext(possibleLanguages1 -> {
                     languageTypes = LanguageType.getList(possibleLanguages1.langs);
                     pairs = Pair.asList(possibleLanguages1.dirs);
@@ -70,13 +70,22 @@ public class TranslatorService {
     public Observable<DictionaryModel.DefModel> lookup(String query) {
         String pair = Pair.pairFrom(getCurrentInput(), getCurrentOutput());
         Log.i(Const.MY_LOG, "lookup: " + query + " " + pair, null);
-        return RxBackgroundWrapper.doInBackground(HttpService.getInstance().lookup(query, pair));
+        return HttpService.getInstance().lookup(query, pair).compose(RxBackgroundWrapper.applySchedulers());
     }
 
     public Observable<LanguageTranslation> translate(CharSequence text) throws UnsupportedEncodingException {
         Log.i(Const.MY_LOG, "translate: " + text.toString() + " " + currentPair.toString(), null);
-        return RxBackgroundWrapper.doInBackground(
-                HttpService.getInstance().translate(text.toString(), currentPair.toString(), "plain", "1"));
+        return HttpService.getInstance().translate(text.toString(), currentPair.toString()).doOnNext(new Action1<LanguageTranslation>() {
+            @Override
+            public void call(LanguageTranslation languageTranslation) {
+                textEntity.outputText = languageTranslation.text.get(0);
+                textEntity.inputText = text.toString();
+                textEntity.inputLanguage = currentInput.shortName;
+                textEntity.outputLanguage = currentOutput.shortName;
+                textEntity.isMarked = false;
+                textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+            }
+        });
     }
 
     public void setCurrentInput(LanguageType currentInput) {
@@ -103,7 +112,7 @@ public class TranslatorService {
         return currentOutput;
     }
 
-    public void swapLanguages() {//TODO:поменять также сущность
+    public void swapLanguages() {
         LanguageType languageType = new LanguageType();
         languageType.longName = currentInput.longName;
         languageType.shortName = currentInput.shortName;
@@ -120,5 +129,10 @@ public class TranslatorService {
     public void setLanguageTypes(List<LanguageType> languageTypes) {
         this.languageTypes = languageTypes;
     }
-
+    public TextEntity clearEntity(){
+        textEntity = new TextEntity();
+        textEntity.inputLanguage = currentInput.shortName;
+        textEntity.outputLanguage = currentOutput.shortName;
+        return textEntity;
+    }
 }

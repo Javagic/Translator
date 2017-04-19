@@ -4,6 +4,7 @@ import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.pojo.LanguageTranslation;
 import com.ilya.translator.models.pojo.PossibleLanguages;
 import com.ilya.translator.utils.Const;
+import com.ilya.translator.utils.RxBackgroundWrapper;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -47,8 +48,8 @@ public class HttpService {
     }
 
 
-    public Observable<LanguageTranslation> translate(String text, String lang, String plain, String options) {
-        return translationApi.translate(Const.TRANSLATION_API_KEY, text, lang, plain, options);
+    public Observable<LanguageTranslation> translate(String text, String lang) {
+        return  translationApi.translate(Const.TRANSLATION_API_KEY, text, lang,  "plain", "1").compose(RxBackgroundWrapper.applySchedulers());
     }
 
     public Observable<PossibleLanguages> getLanguages(String langCode) {

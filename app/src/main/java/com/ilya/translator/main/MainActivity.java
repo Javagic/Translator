@@ -1,6 +1,5 @@
-package com.ilya.translator;
+package com.ilya.translator.main;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
@@ -9,24 +8,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Window;
 
+import com.ilya.translator.R;
 import com.ilya.translator.databinding.AMainBinding;
 import com.ilya.translator.fragments.BookmarkFragment;
 import com.ilya.translator.fragments.SettingsFragment;
 import com.ilya.translator.fragments.TranslateFragment;
-import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.service.TranslatorService;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.Const;
-import com.ilya.translator.utils.RecyclerBindingAdapter;
 
 import java.net.UnknownHostException;
-import java.util.List;
 
 import static com.ilya.translator.utils.Const.Prefs.APP_PREFS;
 import static com.ilya.translator.utils.Const.Prefs.GET_LANGS;
@@ -121,13 +115,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setTranslateFragment(TextEntity textEntity) {
-        TranslateFragment translateFragment = TranslateFragment.newInstance();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("textEntity", textEntity);
-        translateFragment.setArguments(bundle);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_layout, translateFragment)
-                .commit();
+        translatorService.textEntity = textEntity;
+        bottomNavigationView.findViewById(R.id.action_lang).performClick();
     }
 
     @Override

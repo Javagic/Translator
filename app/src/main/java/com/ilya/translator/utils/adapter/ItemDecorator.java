@@ -1,4 +1,4 @@
-package com.ilya.translator.utils;
+package com.ilya.translator.utils.adapter;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;

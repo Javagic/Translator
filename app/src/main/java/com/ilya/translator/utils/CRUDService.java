@@ -3,6 +3,7 @@ package com.ilya.translator.utils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -32,7 +33,6 @@ public class CRUDService extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "CRUDService";
 
-    // Contacts table name
     private static final String TABLE_TEXT_ENTITIES = "textEntities";
 
     private static final String TABLE_LANGUAGE_TYPES = "languageTypes";
@@ -60,6 +60,13 @@ public class CRUDService extends SQLiteOpenHelper {
         return instance;
     }
 
+    public static CRUDService getInstance() {
+        if (instance == null) {
+            return null;
+        }
+        return instance;
+    }
+
     private CRUDService(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -80,7 +87,7 @@ public class CRUDService extends SQLiteOpenHelper {
         String CREATE_LANGUAGE_TABLE = "CREATE TABLE " + TABLE_LANGUAGE_TYPES + "("
                 + KEY_ID + " INTEGER PRIMARY KEY autoincrement,"
                 + KEY_SHORT_NAME + " TEXT,"
-                + KEY_LONG_NAME+ " TEXT"
+                + KEY_LONG_NAME + " TEXT"
                 + ")";
         db.execSQL(CREATE_LANGUAGE_TABLE);
     }
@@ -137,7 +144,7 @@ public class CRUDService extends SQLiteOpenHelper {
     }
 
     public List<TextEntity> getHistory() {
-        List<TextEntity> contactList = new ArrayList<TextEntity>();
+        List<TextEntity> textEntities = new ArrayList<TextEntity>();
         String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES;
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -153,19 +160,19 @@ public class CRUDService extends SQLiteOpenHelper {
                 textEntity.outputText = cursor.getString(4);
                 textEntity.isMarked = Boolean.valueOf(cursor.getString(5));
                 textEntity.pos = cursor.getString(6);
-                contactList.add(textEntity);
+                textEntities.add(textEntity);
             } while (cursor.moveToNext());
         }
 
-        return contactList;
+        return textEntities;
     }
 
     public List<TextEntity> getFavorites() {
-        List<TextEntity> contactList = new ArrayList<TextEntity>();
-        String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES +" WHERE isMarked = ?";
+        List<TextEntity> textEntities = new ArrayList<TextEntity>();
+        String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + " WHERE isMarked = ?";
 
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, new String[] { "true" });
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{"true"});
 
         if (cursor.moveToFirst()) {
             do {
@@ -177,11 +184,11 @@ public class CRUDService extends SQLiteOpenHelper {
                 textEntity.outputText = cursor.getString(4);
                 textEntity.isMarked = Boolean.valueOf(cursor.getString(5));
                 textEntity.pos = cursor.getString(6);
-                contactList.add(textEntity);
+                textEntities.add(textEntity);
             } while (cursor.moveToNext());
         }
 
-        return contactList;
+        return textEntities;
     }
 
     public int updateTextEntity(TextEntity textEntity) {
@@ -199,15 +206,15 @@ public class CRUDService extends SQLiteOpenHelper {
                 new String[]{String.valueOf(textEntity.id)});
     }
 
-    public void deleteTextEntity(TextEntity contact) {
+    public void deleteTextEntity(TextEntity textEntity) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_TEXT_ENTITIES, KEY_ID + " = ?",
-                new String[]{String.valueOf(contact.id)});
+                new String[]{String.valueOf(textEntity.id)});
         db.close();
     }
 
     public int getTextEntitiesCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES;
+        String countQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + "order by" + KEY_ID;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.close();
@@ -245,5 +252,46 @@ public class CRUDService extends SQLiteOpenHelper {
         }
 
         return languageList;
+    }
+
+    public List<TextEntity> searchHistory(String inputText) throws SQLException {
+        if (inputText.isEmpty()) {
+            return getHistory();
+        }
+        String selectQuery = " select * from " + TABLE_TEXT_ENTITIES + " where " + KEY_INPUT_TEXT + " like  '%"
+                + inputText
+                + "%' or " + KEY_OUTPUT_TEXT + " like '%"
+                + inputText + "%'";
+        return searchTextEntity(selectQuery);
+    }
+
+    public List<TextEntity> searchFavorites(String inputText) throws SQLException {
+        if (inputText.isEmpty()) {
+            return getFavorites();
+        }
+
+        String selectQuery = " select * from " + TABLE_TEXT_ENTITIES + " where " + KEY_INPUT_TEXT + " like  '%"
+                + inputText
+                + "%' or " + KEY_OUTPUT_TEXT + " like '%"
+                + inputText + "%'" + " and " + KEY_IS_MARKED + " = 1";
+        return searchTextEntity(selectQuery);
+    }
+
+    private List<TextEntity> searchTextEntity(String selectQuery) {
+        ArrayList<TextEntity> list = new ArrayList<>();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        while (cursor.moveToNext()) {
+            TextEntity textEntity = new TextEntity();
+            textEntity.id = Integer.parseInt(cursor.getString(0));
+            textEntity.inputLanguage = cursor.getString(1);
+            textEntity.outputLanguage = cursor.getString(2);
+            textEntity.inputText = cursor.getString(3);
+            textEntity.outputText = cursor.getString(4);
+            textEntity.isMarked = Boolean.valueOf(cursor.getString(5));
+            textEntity.pos = cursor.getString(6);
+            list.add(textEntity);
+        }
+        return list;
     }
 }

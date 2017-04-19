@@ -13,8 +13,8 @@ import com.ilya.translator.BR;
 import com.ilya.translator.R;
 import com.ilya.translator.databinding.DialogLanguageLayoutBinding;
 import com.ilya.translator.models.LanguageType;
+import com.ilya.translator.utils.adapter.RecyclerBindingAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

@@ -3,33 +3,26 @@ package com.ilya.translator.fragments;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.BR;
-import com.ilya.translator.MainActivity;
 import com.ilya.translator.databinding.FTranslateBinding;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.TextEntity;
-import com.ilya.translator.service.http.HttpService;
 import com.ilya.translator.models.pojo.DictionaryModel;
-import com.ilya.translator.models.Pair;
 import com.ilya.translator.R;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.LanguageDialog;
-import com.ilya.translator.utils.RecyclerBindingAdapter;
-import com.ilya.translator.utils.RxBackgroundWrapper;
+import com.ilya.translator.utils.adapter.RecyclerBindingAdapter;
 import com.ilya.translator.service.TranslatorService;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.ilya.translator.utils.LanguageDialog.FROM;
@@ -61,7 +54,9 @@ public class TranslateFragment extends Fragment implements TextWatcher {
         super.onCreate(savedInstanceState);
         translatorService = TranslatorService.getInstance();
         crudService = CRUDService.getInstance(getActivity());
-        textEntity = translatorService.textEntity;
+        if(textEntity == null){
+            textEntity = translatorService.textEntity;
+        }
     }
 
 
@@ -70,7 +65,7 @@ public class TranslateFragment extends Fragment implements TextWatcher {
         super.setArguments(args);
         if (args.containsKey("textEntity")) {
             textEntity = args.getParcelable("textEntity");
-        } else textEntity = new TextEntity();
+        }
     }
 
     @Override
@@ -87,12 +82,16 @@ public class TranslateFragment extends Fragment implements TextWatcher {
         binding.textArea.setText(textEntity.inputText);
         binding.addFavorite.setOnClickListener(view1 -> {
             textEntity.isMarked = !textEntity.isMarked;
-//            binding.(BR.translationTextEntity);
             crudService.updateTextEntity(textEntity);
             binding.setTranslationTextEntity(textEntity);
         });
         binding.textArea.addTextChangedListener(this);
-
+        binding.clear.setOnClickListener(view -> {
+            textEntity = translatorService.clearEntity();
+            binding.setTranslationTextEntity(textEntity);
+            meaningAdapter.removeList();
+            binding.textArea.setText("");
+        });
         languageList = translatorService.getLanguageTypes();
         initToolbar();
         return rootView;
@@ -109,17 +108,10 @@ public class TranslateFragment extends Fragment implements TextWatcher {
         String query = charSequence.toString().trim();
         if (" ,.;".contains(lastChar)) {
             try {
-                translatorService.translate(query).subscribe(languageTranslation -> {
-                    textEntity.outputText = languageTranslation.text.get(0);
-                    textEntity.inputText = query;
-                    textEntity.inputLanguage = translatorService.getCurrentInput().shortName;
-                    textEntity.outputLanguage = translatorService.getCurrentOutput().shortName;
-                    textEntity.id =
-                            crudService.addTextEntity(textEntity);
+                translatorService.translate(query).subscribe(languageTranslation -> {//вынести куда нибудь отсюда
                     binding.setTranslationTextEntity(textEntity);
                 }, throwable -> {
                 });
-
 
                 translatorService.lookup(query).subscribe(defModel -> {
                     for (int k = 0; k < defModel.tr.size(); k++) {

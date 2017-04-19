@@ -1,4 +1,4 @@
-package com.ilya.translator.utils;
+package com.ilya.translator.utils.adapter;
 
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;

@@ -1,4 +1,4 @@
-package com.ilya.translator;
+package com.ilya.translator.main;
 
 import android.app.Application;
 

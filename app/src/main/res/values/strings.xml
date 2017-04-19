@@ -5,4 +5,5 @@
   <string name="settings">настройки</string>
   <string name="translate_from">Перевод с языка:</string>
   <string name="translate_to">Перевод на язык:</string>
+  <string name="search_hint">Поиск:</string>
 </resources>
