@@ -2,26 +2,21 @@ package com.ilya.translator.service;
 
 import android.util.Log;
 
+import com.ilya.translator.models.LanguageType;
+import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.pojo.LanguageTranslation;
-import com.ilya.translator.models.LanguageType;
-import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.pojo.PossibleLanguages;
 import com.ilya.translator.service.http.HttpService;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.Const;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import rx.Observable;
-import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by Ilya Reznik
@@ -37,6 +32,7 @@ public class TranslatorService {
     private LanguageType currentOutput;
     private Pair currentPair;
     public TextEntity textEntity;
+    private boolean canTranslate;
 
     public static TranslatorService getInstance() {
         if (instance == null) {
@@ -58,8 +54,9 @@ public class TranslatorService {
                 .doOnNext(possibleLanguages1 -> {
                     languageTypes = LanguageType.getList(possibleLanguages1.langs);
                     pairs = Pair.asList(possibleLanguages1.dirs);
+                    makePair();
                 }).doOnError(throwable -> {
-                    Log.i(Const.MY_LOG,"error getlangs internet " + throwable.getMessage() + throwable.getClass());
+                    Log.i(Const.MY_LOG, "error getlangs internet " + throwable.getMessage() + throwable.getClass());
                 });
     }
 
@@ -67,23 +64,33 @@ public class TranslatorService {
         return languageTypes;
     }
 
-    public Observable<DictionaryModel.DefModel> lookup(String query) {
-        String pair = Pair.pairFrom(getCurrentInput(), getCurrentOutput());
-        Log.i(Const.MY_LOG, "lookup: " + query + " " + pair, null);
-        return HttpService.getInstance().lookup(query, pair).compose(RxBackgroundWrapper.applySchedulers());
+    private boolean checkPair() {
+        for (Pair pair : pairs) {
+            if (pair.toString().equals(currentPair.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public Observable<LanguageTranslation> translate(CharSequence text) throws UnsupportedEncodingException {
+    public Observable<DictionaryModel.DefModel> translate(CharSequence text) {
+        String pair = Pair.pairFrom(getCurrentInput(), getCurrentOutput());
         Log.i(Const.MY_LOG, "translate: " + text.toString() + " " + currentPair.toString(), null);
-        return HttpService.getInstance().translate(text.toString(), currentPair.toString()).doOnNext(new Action1<LanguageTranslation>() {
+        return HttpService.getInstance().translate(text.toString(), currentPair.toString()).compose(RxBackgroundWrapper.applySchedulers()).flatMap(new Func1<LanguageTranslation, Observable<DictionaryModel.DefModel>>() {
             @Override
-            public void call(LanguageTranslation languageTranslation) {
+            public Observable<DictionaryModel.DefModel> call(LanguageTranslation languageTranslation) {
                 textEntity.outputText = languageTranslation.text.get(0);
                 textEntity.inputText = text.toString();
                 textEntity.inputLanguage = currentInput.shortName;
                 textEntity.outputLanguage = currentOutput.shortName;
                 textEntity.isMarked = false;
-                textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+                return HttpService.getInstance().lookup(text.toString(), pair).compose(RxBackgroundWrapper.applySchedulers()).doOnNext(defModel -> {
+                    textEntity.pos = defModel != null ? defModel.pos : "";
+                    textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+                }).doOnError(throwable -> {
+                    textEntity.pos = "";
+                    textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+                });
             }
         });
     }
@@ -102,6 +109,7 @@ public class TranslatorService {
 
     private void makePair() {
         currentPair = new Pair(currentInput, currentOutput);
+        canTranslate = pairs != null && checkPair();
     }
 
     public LanguageType getCurrentInput() {
@@ -129,10 +137,39 @@ public class TranslatorService {
     public void setLanguageTypes(List<LanguageType> languageTypes) {
         this.languageTypes = languageTypes;
     }
-    public TextEntity clearEntity(){
+
+    public void clearEntity() {
         textEntity = new TextEntity();
         textEntity.inputLanguage = currentInput.shortName;
         textEntity.outputLanguage = currentOutput.shortName;
-        return textEntity;
+    }
+
+    public void setTextEntity(TextEntity textEntity) {
+        this.textEntity = textEntity;
+        for (LanguageType languageType : languageTypes) {
+            if (languageType.shortName.equals(textEntity.inputLanguage)) {
+                currentInput = new LanguageType(languageType);
+            } else if (languageType.shortName.equals(textEntity.outputLanguage)) {
+                currentOutput = new LanguageType(languageType);
+            }
+        }
+    }
+
+    public void changeMark() {
+        textEntity.isMarked = !textEntity.isMarked;
+        CRUDService.getInstance().updateTextEntity(textEntity);
+    }
+
+    public List<Pair> getPairs() {
+        return pairs;
+    }
+
+    public boolean canTranslate() {
+        return canTranslate;
+    }
+
+    public void setPairs(List<Pair> pairs) {
+        this.pairs = pairs;
+        makePair();
     }
 }

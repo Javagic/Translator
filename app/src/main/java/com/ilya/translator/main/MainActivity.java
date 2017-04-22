@@ -3,11 +3,11 @@ package com.ilya.translator.main;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
+import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.ilya.translator.R;
@@ -56,8 +56,7 @@ public class MainActivity extends AppCompatActivity {
             transaction.replace(R.id.frame_layout, selectedFragment);
             transaction.commit();
             return true;
-        });
-        SharedPreferences prefs = getSharedPreferences(APP_PREFS, MODE_PRIVATE);
+        });SharedPreferences prefs = getSharedPreferences(APP_PREFS, MODE_PRIVATE);
 
         if (!prefs.getBoolean(GET_LANGS, false)) {
             ProgressDialog loading = ProgressDialog.show(this, "Загружаю данные", "Подождите пожалуйста...", true);//set content
@@ -65,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(Const.MY_LOG, "getlangs loaded");
 
                 crudService.addLanguageTypes(translatorService.getLanguageTypes());
+                crudService.addPairs(translatorService.getPairs());
 
                 TranslateFragment translateFragment = TranslateFragment.newInstance();//init
                 getSupportFragmentManager().beginTransaction()
@@ -78,13 +78,14 @@ public class MainActivity extends AppCompatActivity {
             }, throwable -> {
                 if (throwable instanceof UnknownHostException) {
                     loading.setTitle("Ошибка");
-                    loading.setMessage("не удалось загрузить данные, проверьте интернет");
+                    loading.setMessage(getString(R.string.e_loading));
                 }
                 Log.i(Const.MY_LOG, "error getlangs" + throwable.getMessage());
             });
         } else {
             Log.i(Const.MY_LOG, "local getlangs");
             translatorService.setLanguageTypes(crudService.getLanguageTypeList());
+            translatorService.setPairs(crudService.getPairs());
             TranslateFragment translateFragment = TranslateFragment.newInstance();//init
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.frame_layout, translateFragment)
@@ -115,17 +116,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setTranslateFragment(TextEntity textEntity) {
-        translatorService.textEntity = textEntity;
+        translatorService.setTextEntity(textEntity);
         bottomNavigationView.findViewById(R.id.action_lang).performClick();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
     }
 }

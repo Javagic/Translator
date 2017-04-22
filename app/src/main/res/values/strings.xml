@@ -6,4 +6,7 @@
   <string name="translate_from">Перевод с языка:</string>
   <string name="translate_to">Перевод на язык:</string>
   <string name="search_hint">Поиск:</string>
+  <string name="e_internet">Не удалось перевести, проверьте соединение с интернетом</string>
+  <string name="e_translation">Выбранный перевод не поддерживается</string>
+  <string name="e_loading">"не удалось загрузить данные, проверьте интернет"</string>
 </resources>

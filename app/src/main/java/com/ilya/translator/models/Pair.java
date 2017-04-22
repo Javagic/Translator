@@ -10,17 +10,22 @@ import java.util.List;
  * on 08.04.17 17:07.
  */
 public class Pair {
-    String from;
-    String to;
+    public long id;
+    public String from;
+    public String to;
+
+    public Pair() {}
 
     public Pair(String from, String to) {
         this.from = from;
         this.to = to;
     }
+
     public Pair(LanguageType from, LanguageType to) {
         this.from = from.shortName;
         this.to = to.shortName;
     }
+
     public Pair(String pair) {
         this.from = pair.split("-")[0];
         this.to = pair.split("-")[1];
@@ -30,24 +35,25 @@ public class Pair {
         this.from = type.shortName;
         this.to = type.shortName;
     }
+
     @Override
     public String toString() {
         return from + "-" + to;
     }
 
-    public static  String pairFrom(LanguageType type){
-        return type.shortName+"-"+type.shortName;
+    public static String pairFrom(LanguageType type) {
+        return type.shortName + "-" + type.shortName;
     }
 
-    public static  String pairFrom(LanguageType typeFrom,LanguageType typeTo){
-        return typeFrom.shortName+"-"+typeTo.shortName;
+    public static String pairFrom(LanguageType typeFrom, LanguageType typeTo) {
+        return typeFrom.shortName + "-" + typeTo.shortName;
     }
 
-    public static  String pairFromUpperCase(LanguageType type,LanguageType type2){
-        return type.shortName.toUpperCase()+"-"+type2.shortName.toUpperCase();
+    public static String pairFromUpperCase(LanguageType type, LanguageType type2) {
+        return type.shortName.toUpperCase() + "-" + type2.shortName.toUpperCase();
     }
 
-    public static List<Pair> asList(List<String> list){
+    public static List<Pair> asList(List<String> list) {
         List<Pair> pairs = new ArrayList<>();
         for (String s : list) {
             pairs.add(new Pair(s));

@@ -14,13 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.BR;
-import com.ilya.translator.main.MainActivity;
 import com.ilya.translator.R;
+import com.ilya.translator.databinding.FHistoryBinding;
+import com.ilya.translator.main.MainActivity;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.adapter.ItemDecorator;
 import com.ilya.translator.utils.adapter.RecyclerBindingAdapter;
-import com.ilya.translator.databinding.FHistoryBinding;
 
 /**
  * Created by Ilya Reznik
@@ -69,13 +69,13 @@ public class HistoryFragment extends Fragment implements SearchView.OnQueryTextL
         });
         textEntitiesAdapter.setOnLongItemClickListener((position, item) -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setPositiveButton("Удалить перевод?", (dialogInterface, i) -> {
+            builder.setTitle("Удалить перевод?");
+            builder.setPositiveButton("Да", (dialogInterface, i) -> {
                         textEntitiesAdapter.notifyItemRemoved(position);
                         //доделать
                     }
             );
-            builder.setOnCancelListener(dialogInterface -> {
-            });
+            builder.setNegativeButton("нет", (dialogInterface, i) -> {});
             builder.show();
         });
         searchView = binding.searchView;

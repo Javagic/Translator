@@ -17,6 +17,7 @@ public class DictionaryModel {
 
     public class DefModel {
 
+
         @SerializedName("text")
         public String text;
 
@@ -30,7 +31,7 @@ public class DictionaryModel {
         @SerializedName("tr")
         public ArrayList<TrModel> tr;
 
-        public class TrModel{
+        public class TrModel {
 
             public String number;
 

@@ -4,7 +4,6 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -66,5 +65,8 @@ public class   LanguageType implements Parcelable {
     return languageTypes;
   }
 
-
+  public LanguageType(LanguageType languageType) {
+    this.shortName = languageType.shortName;
+    this.longName = languageType.longName;
+  }
 }

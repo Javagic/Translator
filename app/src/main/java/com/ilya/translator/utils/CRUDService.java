@@ -10,9 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.TextEntity;
-import com.ilya.translator.service.TranslatorService;
-
-import org.apache.commons.codec.language.bm.Lang;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +34,8 @@ public class CRUDService extends SQLiteOpenHelper {
 
     private static final String TABLE_LANGUAGE_TYPES = "languageTypes";
 
+    private static final String TABLE_PAIRS = "pairs";
+
     private static final String KEY_ID = "_id";
 
     //TABLE_TEXT_ENTITIES
@@ -50,6 +49,11 @@ public class CRUDService extends SQLiteOpenHelper {
     //TABLE_LANGUAGE_TYPES
     private static final String KEY_SHORT_NAME = "shortName";
     private static final String KEY_LONG_NAME = "longName";
+
+    //TABLE_PAIRS
+    private static final String KEY_FIRST_LANG = "firstLang";
+    private static final String KEY_SECOND_LANG = "secondLang";
+
 
 
     public static CRUDService getInstance(Context context) {
@@ -90,16 +94,19 @@ public class CRUDService extends SQLiteOpenHelper {
                 + KEY_LONG_NAME + " TEXT"
                 + ")";
         db.execSQL(CREATE_LANGUAGE_TABLE);
+        String CREATE_PAIRS_TABLE = "CREATE TABLE " + TABLE_PAIRS + "("
+                + KEY_ID + " INTEGER PRIMARY KEY autoincrement,"
+                + KEY_FIRST_LANG + " TEXT,"
+                + KEY_SECOND_LANG + " TEXT"
+                + ")";
+        db.execSQL(CREATE_PAIRS_TABLE);
     }
 
-    // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TEXT_ENTITIES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LANGUAGE_TYPES);
-
-        // Create tables again
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PAIRS);
         onCreate(db);
     }
 
@@ -120,28 +127,6 @@ public class CRUDService extends SQLiteOpenHelper {
         return a;
     }
 
-    TextEntity getTextEntity(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_TEXT_ENTITIES, new String[]{
-                        KEY_ID,
-                        KEY_INPUT_LANGUAGE,
-                        KEY_OUTPUT_LANGUAGE,
-                        KEY_INPUT_TEXT,
-                        KEY_OUTPUT_TEXT,
-                        KEY_IS_MARKED,
-                        KEY_POS
-                }, KEY_ID + "=?",
-
-                new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        TextEntity textEntity = new TextEntity(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getString(5));
-
-        return textEntity;
-    }
 
     public List<TextEntity> getHistory() {
         List<TextEntity> textEntities = new ArrayList<TextEntity>();
@@ -206,21 +191,6 @@ public class CRUDService extends SQLiteOpenHelper {
                 new String[]{String.valueOf(textEntity.id)});
     }
 
-    public void deleteTextEntity(TextEntity textEntity) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_TEXT_ENTITIES, KEY_ID + " = ?",
-                new String[]{String.valueOf(textEntity.id)});
-        db.close();
-    }
-
-    public int getTextEntitiesCount() {
-        String countQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + "order by" + KEY_ID;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-
-        return cursor.getCount();
-    }
 
     public void addLanguageTypes(List<LanguageType> languageTypes) {
 
@@ -293,5 +263,36 @@ public class CRUDService extends SQLiteOpenHelper {
             list.add(textEntity);
         }
         return list;
+    }
+
+    public void addPairs(List<Pair> pairs) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        for (Pair pair : pairs) {
+            ContentValues values = new ContentValues();
+            values.put(KEY_FIRST_LANG, pair.from);
+            values.put(KEY_SECOND_LANG, pair.to);
+            db.insertOrThrow(TABLE_PAIRS, null, values);
+        }
+        db.close();
+    }
+
+    public List<Pair> getPairs() {
+        List<Pair> pairs = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM " + TABLE_PAIRS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Pair pair = new Pair();
+                pair.id = Integer.parseInt(cursor.getString(0));
+                pair.from = cursor.getString(1);
+                pair.to = cursor.getString(2);
+                pairs.add(pair);
+            } while (cursor.moveToNext());
+        }
+
+        return pairs;
     }
 }

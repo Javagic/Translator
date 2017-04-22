@@ -1,15 +1,11 @@
 package com.ilya.translator.utils;
 
 import android.databinding.BindingAdapter;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ilya.translator.R;
 import com.ilya.translator.models.LanguageType;
-import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.service.TranslatorService;
@@ -40,6 +36,7 @@ public class BindingUtils {
                                DictionaryModel.DefModel.TrModel trModel) {
         if (trModel.mean != null) {
             textView.setText("(" + buildMeaning(trModel.mean) + ")");
+            textView.setVisibility(View.VISIBLE);
         } else textView.setVisibility(View.GONE);
     }
 
@@ -58,6 +55,11 @@ public class BindingUtils {
                 textView.setText(languageType.longName);
             }
         }
+    }
+
+    @BindingAdapter("favorite")
+    public static void favorite(ImageView textView, TextEntity textEntity) {
+
     }
 }
 

@@ -60,7 +60,9 @@ public class HttpService {
         return dictionaryApi.lookup(Const.DICTIONARY_API_KEY, text, lang).flatMap(new Func1<DictionaryModel, Observable<DictionaryModel.DefModel>>() {
             @Override
             public Observable<DictionaryModel.DefModel> call(DictionaryModel dictionaryModel) {
-                if(dictionaryModel.def.isEmpty()) return Observable.error(new Throwable("нет перевода"));
+                if(dictionaryModel.def.isEmpty()){
+                    return Observable.just(null);
+                }
                 return Observable.just(dictionaryModel.def.get(0));
             }
         });

@@ -1,7 +1,6 @@
 package com.ilya.translator.models;
 
 import android.os.Parcelable;
-
 /**
  * Created by Ilya Reznik
  * reznikid@altarix.ru

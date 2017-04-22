@@ -94,19 +94,29 @@
                     android:lines="8"
                     android:maxLines="10"
                     android:minLines="6"
-                    android:padding="8dp"
-                    android:paddingEnd="25dp"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="29dp"
+                    android:paddingBottom="29dp"
                     android:scrollbars="vertical" />
 
                 <ImageView
                     android:id="@+id/clear"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:layout_alignBottom="@+id/text_area"
-                    android:layout_alignEnd="@+id/text_area"
+                    android:layout_alignStart="@+id/text_area"
                     android:padding="5dp"
                     android:src="@drawable/ic_cross" />
 
+                <ImageView
+                    android:id="@+id/soundInput"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_alignEnd="@+id/text_area"
+                    android:layout_alignTop="@+id/text_area"
+                    android:layout_margin="2dp"
+                    android:src="@drawable/ic_volume" />
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -115,11 +125,19 @@
                     android:layout_marginRight="20dp">
 
                     <ImageView
+                        android:id="@+id/soundOutput"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:background="@drawable/ic_volume" />
+
+                    <ImageView
                         android:id="@+id/addFavorite"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:layout_alignParentEnd="true"
                         android:layout_margin="10dp"
+                        android:layout_below="@+id/soundOutput"
                         android:background="@{translationTextEntity.isMarked ? @drawable/ic_bookmark_yellow : 	@drawable/ic_bookmark_gray}"
                         android:visibility="@{translationTextEntity.outputText == null ? v.INVISIBLE :v.VISIBLE}"
                         tools:background="@drawable/ic_bookmark_yellow" />

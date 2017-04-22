@@ -29,6 +29,7 @@
             android:layout_height="40dp"
             android:layout_margin="10dp"
             android:background="@{textEntity.isMarked ? @drawable/ic_bookmark_yellow : 	@drawable/ic_bookmark_gray}"
+            app:favorite = "@{textEntity}"
             tools:background="@drawable/ic_bookmark_gray" />
 
         <TextView
