@@ -1,4 +1,4 @@
-package com.ilya.translator.service.http;
+package com.ilya.translator.service.api;
 
 import com.ilya.translator.models.pojo.LanguageTranslation;
 import com.ilya.translator.models.pojo.PossibleLanguages;

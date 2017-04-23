@@ -13,9 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ilya.translator.BR;
-import com.ilya.translator.main.MainActivity;
 import com.ilya.translator.R;
 import com.ilya.translator.databinding.FFavoritesBinding;
+import com.ilya.translator.main.MainActivity;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.adapter.ItemDecorator;
@@ -46,10 +46,6 @@ public class FavoritesFragment extends Fragment implements SearchView.OnQueryTex
     }
 
 
-    @Override
-    public void setArguments(Bundle args) {
-        super.setArguments(args);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,

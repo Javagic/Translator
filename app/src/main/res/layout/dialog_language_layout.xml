@@ -15,7 +15,13 @@
       android:layout_height="wrap_content"
       android:text="@string/translate_from"
       android:textStyle="bold"
+      android:layout_margin="3dp"
       />
+  <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_alignBottom="@+id/text"
+      android:background="@color/lightGray"/>
   <android.support.v7.widget.RecyclerView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

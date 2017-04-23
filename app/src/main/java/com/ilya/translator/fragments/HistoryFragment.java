@@ -46,12 +46,6 @@ public class HistoryFragment extends Fragment implements SearchView.OnQueryTextL
         crudService = CRUDService.getInstance(getActivity());
     }
 
-
-    @Override
-    public void setArguments(Bundle args) {
-        super.setArguments(args);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,

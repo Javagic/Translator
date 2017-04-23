@@ -2,8 +2,8 @@ package com.ilya.translator.main;
 
 import android.app.Application;
 
-import com.ilya.translator.service.TranslatorService;
 import com.ilya.translator.service.http.HttpService;
+import com.ilya.translator.service.translation.TranslatorService;
 import com.ilya.translator.utils.CRUDService;
 
 /**

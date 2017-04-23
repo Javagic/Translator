@@ -3,6 +3,8 @@ package com.ilya.translator.service.http;
 import com.ilya.translator.models.pojo.DictionaryModel;
 import com.ilya.translator.models.pojo.LanguageTranslation;
 import com.ilya.translator.models.pojo.PossibleLanguages;
+import com.ilya.translator.service.api.DictionaryApi;
+import com.ilya.translator.service.api.TranslationApi;
 import com.ilya.translator.utils.Const;
 import com.ilya.translator.utils.RxBackgroundWrapper;
 

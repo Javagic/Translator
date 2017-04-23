@@ -1,4 +1,4 @@
-package com.ilya.translator.service;
+package com.ilya.translator.service.translation;
 
 import android.util.Log;
 
@@ -47,6 +47,7 @@ public class TranslatorService {
         setCurrentOutput(new LanguageType("en", "Английский"));
         textEntity.inputLanguage = currentInput.shortName;
         textEntity.outputLanguage = currentOutput.shortName;
+        textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
     }
 
     public Observable<PossibleLanguages> loadLanguageVariations() {
@@ -74,7 +75,6 @@ public class TranslatorService {
     }
 
     public Observable<DictionaryModel.DefModel> translate(CharSequence text) {
-        String pair = Pair.pairFrom(getCurrentInput(), getCurrentOutput());
         Log.i(Const.MY_LOG, "translate: " + text.toString() + " " + currentPair.toString(), null);
         return HttpService.getInstance().translate(text.toString(), currentPair.toString()).compose(RxBackgroundWrapper.applySchedulers()).flatMap(new Func1<LanguageTranslation, Observable<DictionaryModel.DefModel>>() {
             @Override
@@ -84,12 +84,12 @@ public class TranslatorService {
                 textEntity.inputLanguage = currentInput.shortName;
                 textEntity.outputLanguage = currentOutput.shortName;
                 textEntity.isMarked = false;
-                return HttpService.getInstance().lookup(text.toString(), pair).compose(RxBackgroundWrapper.applySchedulers()).doOnNext(defModel -> {
+                return HttpService.getInstance().lookup(text.toString(), currentPair.toString()).compose(RxBackgroundWrapper.applySchedulers()).doOnNext(defModel -> {
                     textEntity.pos = defModel != null ? defModel.pos : "";
-                    textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+                    CRUDService.getInstance().updateTextEntity(textEntity);
                 }).doOnError(throwable -> {
                     textEntity.pos = "";
-                    textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+                    CRUDService.getInstance().updateTextEntity(textEntity);
                 });
             }
         });
@@ -120,32 +120,39 @@ public class TranslatorService {
         return currentOutput;
     }
 
-    public void swapLanguages() {
+    public TextEntity swapLanguages() {
         LanguageType languageType = new LanguageType();
         languageType.longName = currentInput.longName;
         languageType.shortName = currentInput.shortName;
         currentInput = currentOutput;
         currentOutput = languageType;
         makePair();
+        String inputText = textEntity.outputText;
+        String outputText = textEntity.inputText;
+        textEntity = new TextEntity();
         textEntity.inputLanguage = currentInput.shortName;
         textEntity.outputLanguage = currentOutput.shortName;
-        String inputText = textEntity.inputText;
-        textEntity.inputText = textEntity.outputText;
-        textEntity.outputText = inputText;
+        textEntity.inputText = inputText;
+        textEntity.outputText = outputText;
+        textEntity.id =CRUDService.getInstance().addTextEntity(textEntity);
+        return textEntity;
     }
 
     public void setLanguageTypes(List<LanguageType> languageTypes) {
         this.languageTypes = languageTypes;
     }
 
-    public void clearEntity() {
+    public TextEntity clearEntity() {
         textEntity = new TextEntity();
         textEntity.inputLanguage = currentInput.shortName;
         textEntity.outputLanguage = currentOutput.shortName;
+        textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+        return textEntity;
     }
 
     public void setTextEntity(TextEntity textEntity) {
-        this.textEntity = textEntity;
+        this.textEntity = new TextEntity(textEntity);
+        this.textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
         for (LanguageType languageType : languageTypes) {
             if (languageType.shortName.equals(textEntity.inputLanguage)) {
                 currentInput = new LanguageType(languageType);
@@ -153,11 +160,25 @@ public class TranslatorService {
                 currentOutput = new LanguageType(languageType);
             }
         }
+        makePair();
     }
 
-    public void changeMark() {
+    public boolean changeMark(boolean flag) {
         textEntity.isMarked = !textEntity.isMarked;
+        if (flag) {
+            for (TextEntity entity : CRUDService.getInstance().getFavorites()) {
+                if (textEntity.equals(entity)) {
+                    textEntity.isMarked = !textEntity.isMarked;
+                    return false;
+                }
+            }
+            CRUDService.getInstance().updateTextEntity(textEntity);
+            textEntity = new TextEntity(textEntity);
+            textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
+            return true;
+        }
         CRUDService.getInstance().updateTextEntity(textEntity);
+        return true;
     }
 
     public List<Pair> getPairs() {

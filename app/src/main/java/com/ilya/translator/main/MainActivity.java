@@ -16,7 +16,7 @@ import com.ilya.translator.fragments.BookmarkFragment;
 import com.ilya.translator.fragments.SettingsFragment;
 import com.ilya.translator.fragments.TranslateFragment;
 import com.ilya.translator.models.TextEntity;
-import com.ilya.translator.service.TranslatorService;
+import com.ilya.translator.service.translation.TranslatorService;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.Const;
 

@@ -12,6 +12,7 @@ import com.ilya.translator.models.Pair;
 import com.ilya.translator.models.TextEntity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,6 +25,8 @@ public class CRUDService extends SQLiteOpenHelper {
 
     private static CRUDService instance;
 
+    public static int MAX_HISTORY_ITEMS_COUNT = 200;
+    public static int PREFERABLE_HISTORY_ITEMS_COUNT = 40;
     // Database Version
     private static final int DATABASE_VERSION = 1;
 
@@ -55,11 +58,12 @@ public class CRUDService extends SQLiteOpenHelper {
     private static final String KEY_SECOND_LANG = "secondLang";
 
 
-
     public static CRUDService getInstance(Context context) {
         if (instance == null) {
             instance = new CRUDService(context);
-
+            if (instance.getHistoryCount() > MAX_HISTORY_ITEMS_COUNT) {
+                instance.removeExtraHistory();
+            }
         }
         return instance;
     }
@@ -116,8 +120,8 @@ public class CRUDService extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_OUTPUT_LANGUAGE, textEntity.outputLanguage);
         values.put(KEY_INPUT_LANGUAGE, textEntity.inputLanguage);
-        values.put(KEY_INPUT_TEXT, textEntity.outputText);
-        values.put(KEY_OUTPUT_TEXT, textEntity.inputText);
+        values.put(KEY_INPUT_TEXT, textEntity.inputText);
+        values.put(KEY_OUTPUT_TEXT, textEntity.outputText);
         values.put(KEY_IS_MARKED, Boolean.toString(textEntity.isMarked));
         values.put(KEY_POS, textEntity.pos);
 
@@ -129,8 +133,8 @@ public class CRUDService extends SQLiteOpenHelper {
 
 
     public List<TextEntity> getHistory() {
-        List<TextEntity> textEntities = new ArrayList<TextEntity>();
-        String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES;
+        List<TextEntity> textEntities = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + " where " + KEY_INPUT_TEXT + " is not null and " + KEY_INPUT_TEXT + " <> '' ";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -148,16 +152,17 @@ public class CRUDService extends SQLiteOpenHelper {
                 textEntities.add(textEntity);
             } while (cursor.moveToNext());
         }
-
+        cursor.close();
+        Collections.reverse(textEntities);
         return textEntities;
     }
 
     public List<TextEntity> getFavorites() {
         List<TextEntity> textEntities = new ArrayList<TextEntity>();
-        String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + " WHERE isMarked = ?";
+        String selectQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + " where " + KEY_INPUT_TEXT + " is not null and " + KEY_INPUT_TEXT + " <> '' " + " AND " + KEY_IS_MARKED + " = 'true'";
 
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, new String[]{"true"});
+        Cursor cursor = db.rawQuery(selectQuery,null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -172,7 +177,7 @@ public class CRUDService extends SQLiteOpenHelper {
                 textEntities.add(textEntity);
             } while (cursor.moveToNext());
         }
-
+        Collections.reverse(textEntities);
         return textEntities;
     }
 
@@ -243,7 +248,7 @@ public class CRUDService extends SQLiteOpenHelper {
         String selectQuery = " select * from " + TABLE_TEXT_ENTITIES + " where " + KEY_INPUT_TEXT + " like  '%"
                 + inputText
                 + "%' or " + KEY_OUTPUT_TEXT + " like '%"
-                + inputText + "%'" + " and " + KEY_IS_MARKED + " = 1";
+                + inputText + "%'" + " and " + KEY_IS_MARKED + " = 'true'";
         return searchTextEntity(selectQuery);
     }
 
@@ -294,5 +299,53 @@ public class CRUDService extends SQLiteOpenHelper {
         }
 
         return pairs;
+    }
+
+
+
+    public int getHistoryCount() {
+        String countQuery = "SELECT  * FROM " + TABLE_TEXT_ENTITIES + " where " + KEY_IS_MARKED + " = 'false'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
+
+    private void removeExtraHistory() {
+        String query = "DELETE FROM " + TABLE_TEXT_ENTITIES +
+                " WHERE " + KEY_ID +
+                " IN (SELECT " + KEY_ID + " FROM " + TABLE_TEXT_ENTITIES +
+                " ORDER BY " + KEY_ID + " ASC LIMIT " + (MAX_HISTORY_ITEMS_COUNT - PREFERABLE_HISTORY_ITEMS_COUNT) + " ) " +
+                " AND " + KEY_IS_MARKED + " = 'false'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        cursor.moveToFirst();
+        cursor.close();
+    }
+
+    public  void removeAllHistory() {
+        String query = "DELETE FROM " + TABLE_TEXT_ENTITIES +
+                " WHERE "+ KEY_IS_MARKED + " = 'false'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        cursor.moveToFirst();
+        cursor.close();
+    }
+    public  void removeAllLanguages() {
+        String query = "DELETE FROM " + TABLE_LANGUAGE_TYPES ;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToFirst();
+        cursor.close();
+    }
+    public  void removeAllPairs() {
+        String query = "DELETE FROM " + TABLE_PAIRS ;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToFirst();
+        cursor.close();
     }
 }

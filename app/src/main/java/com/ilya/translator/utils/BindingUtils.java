@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
-import com.ilya.translator.service.TranslatorService;
+import com.ilya.translator.service.translation.TranslatorService;
 
 import java.util.ArrayList;
 
