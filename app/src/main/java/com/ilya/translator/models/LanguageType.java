@@ -15,8 +15,8 @@ import java.util.Map;
  */
 public class   LanguageType implements Parcelable {
   public long id;
-  public  String shortName;//короткое название
-  public  String longName;//длинное  название
+  public  String shortName;
+  public  String longName;
 
   public LanguageType(final String shortName) {
     this.shortName = shortName;

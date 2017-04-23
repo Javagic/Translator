@@ -19,34 +19,39 @@ import com.ilya.translator.databinding.FBookmarkBinding;
  * skype be3bapuahta
  * on 05.04.17 20:05.
  */
+
+/**
+ * Фрагмент содержащий историю переводов и избранные переводы
+ */
 public class BookmarkFragment extends Fragment {
-  FBookmarkBinding binding;
-  ViewPager viewPager;
-  public static BookmarkFragment newInstance() {
-    BookmarkFragment fragment = new BookmarkFragment();
-    return fragment;
-  }
+    FBookmarkBinding binding;
+    ViewPager viewPager;
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-  }
+    public static BookmarkFragment newInstance() {
+        BookmarkFragment fragment = new BookmarkFragment();
+        return fragment;
+    }
 
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
-    binding = DataBindingUtil.inflate(inflater, R.layout.f_bookmark, container, false);
-    viewPager = binding.viewPager;
-    TabLayout tabLayout = binding.tabLayout;
-    Fragment[] fragments = {
-        Fragment.instantiate(getActivity(), HistoryFragment.class.getName()),
-        Fragment.instantiate(getActivity(), FavoritesFragment.class.getName())
-    };
-    PagerAdapter pagerAdapter = new com.ilya.translator.utils.adapter.PagerAdapter(getChildFragmentManager(),fragments);
-    viewPager.setAdapter(pagerAdapter);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        binding = DataBindingUtil.inflate(inflater, R.layout.f_bookmark, container, false);
+        viewPager = binding.viewPager;
+        TabLayout tabLayout = binding.tabLayout;
+        Fragment[] fragments = {
+                Fragment.instantiate(getActivity(), HistoryFragment.class.getName()),
+                Fragment.instantiate(getActivity(), FavoritesFragment.class.getName())
+        };
+        PagerAdapter pagerAdapter = new com.ilya.translator.utils.adapter.PagerAdapter(getChildFragmentManager(), fragments);
+        viewPager.setAdapter(pagerAdapter);
 
 
-    tabLayout.setupWithViewPager(viewPager);
-    return binding.getRoot();
-  }
+        tabLayout.setupWithViewPager(viewPager);
+        return binding.getRoot();
+    }
 }

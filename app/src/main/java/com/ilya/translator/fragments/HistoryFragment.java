@@ -63,13 +63,15 @@ public class HistoryFragment extends Fragment implements SearchView.OnQueryTextL
         });
         textEntitiesAdapter.setOnLongItemClickListener((position, item) -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Удалить перевод?");
+            builder.setTitle(getString(R.string.delete_translation));
             builder.setPositiveButton("Да", (dialogInterface, i) -> {
-                        textEntitiesAdapter.notifyItemRemoved(position);
+                        crudService.deleteTextEntity(item);
+                        textEntitiesAdapter.removeItem(position);
                         //доделать
                     }
             );
-            builder.setNegativeButton("нет", (dialogInterface, i) -> {});
+            builder.setNegativeButton("нет", (dialogInterface, i) -> {
+            });
             builder.show();
         });
         searchView = binding.searchView;
@@ -78,11 +80,6 @@ public class HistoryFragment extends Fragment implements SearchView.OnQueryTextL
         searchView.onActionViewExpanded();
 
         return view;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
 

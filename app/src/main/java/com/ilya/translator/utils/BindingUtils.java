@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
-import com.ilya.translator.service.translation.TranslatorService;
+import com.ilya.translator.service.translation.TranslatorManager;
 
 import java.util.ArrayList;
 
@@ -18,6 +18,7 @@ import java.util.ArrayList;
  * skype be3bapuahta
  * on 12.04.17 19:07.
  */
+
 public class BindingUtils {
 
     @BindingAdapter("translatedMeaning")
@@ -50,7 +51,7 @@ public class BindingUtils {
 
     @BindingAdapter("longLanguage")
     public static void longLanguage(TextView textView, String language) {
-        for (LanguageType languageType : TranslatorService.getInstance().getLanguageTypes()) {
+        for (LanguageType languageType : TranslatorManager.getInstance().getLanguageTypes()) {
             if (language.equals(languageType.shortName)) {
                 textView.setText(languageType.longName);
             }

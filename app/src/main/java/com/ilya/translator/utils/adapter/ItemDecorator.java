@@ -12,6 +12,10 @@ import android.view.View;
  * skype be3bapuahta
  * on 14.04.17 21:02.
  */
+
+/**
+ * разделитель итемов в RecyclerView
+ */
 public class ItemDecorator extends RecyclerView.ItemDecoration {
   private static final int WHITE_SPACE=0;
   private Drawable mDivider;

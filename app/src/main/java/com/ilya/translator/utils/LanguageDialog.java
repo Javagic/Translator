@@ -23,6 +23,10 @@ import java.util.List;
  * skype be3bapuahta
  * on 16.04.17 16:58.
  */
+
+/**
+ * диалог, предоствавляет возможность выбора языка для перевода
+ */
 public class LanguageDialog extends Dialog {
     public static String FROM = "from";
     public static String TO = "to";

@@ -20,7 +20,7 @@ import com.ilya.translator.databinding.FTranslateBinding;
 import com.ilya.translator.models.LanguageType;
 import com.ilya.translator.models.TextEntity;
 import com.ilya.translator.models.pojo.DictionaryModel;
-import com.ilya.translator.service.translation.TranslatorService;
+import com.ilya.translator.service.translation.TranslatorManager;
 import com.ilya.translator.utils.LanguageDialog;
 import com.ilya.translator.utils.adapter.RecyclerBindingAdapter;
 
@@ -37,17 +37,24 @@ import static com.ilya.translator.utils.LanguageDialog.TO;
  * skype be3bapuahta
  * on 05.04.17 20:03.
  */
+
+/**
+ * Основной фрагмент перевода текста
+ */
 public class TranslateFragment extends Fragment implements TextWatcher {
 
     public static long DELAY_TIME = 600;
-    TranslatorService translatorService;
-    RecyclerView recyclerView;
-    RecyclerBindingAdapter<DictionaryModel.DefModel.TrModel> meaningAdapter;
-    List<DictionaryModel.DefModel.TrModel> trModelList;
-    TextEntity textEntity;
-    List<LanguageType> languageList;
-    TextToSpeech inputTextToSpeech;
-    TextToSpeech outputTextToSpeech;
+    private TranslatorManager translatorManager;
+    private RecyclerBindingAdapter<DictionaryModel.DefModel.TrModel> meaningAdapter;
+
+    /**
+     * сущность введенного текста
+     */
+    private TextEntity textEntity;
+    private List<LanguageType> languageList;
+
+    private TextToSpeech inputTextToSpeech;
+    private TextToSpeech outputTextToSpeech;
 
     private Handler handler = new Handler();
     private Runnable runnable;
@@ -62,9 +69,9 @@ public class TranslateFragment extends Fragment implements TextWatcher {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        translatorService = TranslatorService.getInstance();
+        translatorManager = TranslatorManager.getInstance();
         if (textEntity == null) {
-            textEntity = translatorService.textEntity;
+            textEntity = translatorManager.textEntity;
         }
         inputTextToSpeech = new TextToSpeech(getActivity(), status -> {
             if (status != TextToSpeech.ERROR) {
@@ -93,7 +100,7 @@ public class TranslateFragment extends Fragment implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        if (charSequence.toString().isEmpty()){
+        if (charSequence.toString().isEmpty()) {
             handler.removeCallbacks(runnable);
             clearTextEntity();
             return;
@@ -113,19 +120,18 @@ public class TranslateFragment extends Fragment implements TextWatcher {
 
     private void init() {
         binding.setTranslationTextEntity(textEntity);
-        recyclerView = binding.meaningRecycler;
+        RecyclerView recyclerView = binding.meaningRecycler;
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        meaningAdapter = new RecyclerBindingAdapter<>(R.layout.item_meaning, BR.trModel, trModelList);
+        meaningAdapter = new RecyclerBindingAdapter<>(R.layout.item_meaning, BR.trModel, null);
         recyclerView.setAdapter(meaningAdapter);
         binding.textArea.addTextChangedListener(this);
-        if(textEntity.inputText!=null && !"".equals(textEntity.inputText)){
+        if (textEntity.inputText != null && !"".equals(textEntity.inputText)) {
             binding.textArea.setText(textEntity.inputText);
         }
         binding.addFavorite.setOnClickListener(view1 -> {
-            if(translatorService.changeMark(!textEntity.isMarked)){
-                textEntity = translatorService.textEntity;
-            }
-            else{
+            if (translatorManager.changeMark(!textEntity.isMarked)) {
+                textEntity = translatorManager.textEntity;
+            } else {
                 Toast.makeText(getActivity(), "Уже в избранном", Toast.LENGTH_SHORT).show();
             }
             binding.setTranslationTextEntity(textEntity);
@@ -135,12 +141,12 @@ public class TranslateFragment extends Fragment implements TextWatcher {
         });
         binding.soundInput.setOnClickListener(view -> inputTextToSpeech.speak(textEntity.inputText, TextToSpeech.QUEUE_FLUSH, null));
         binding.soundOutput.setOnClickListener(view -> outputTextToSpeech.speak(textEntity.outputText, TextToSpeech.QUEUE_FLUSH, null));
-        languageList = translatorService.getLanguageTypes();
+        languageList = translatorManager.getLanguageTypes();
     }
 
     private void initToolbar() {
         binding.swapLanguage.setOnClickListener(view -> {
-            textEntity = translatorService.swapLanguages();
+            textEntity = translatorManager.swapLanguages();
             binding.textArea.setText(textEntity.inputText);
             binding.setTranslationTextEntity(textEntity);
             if (textEntity.inputText != null)
@@ -153,7 +159,7 @@ public class TranslateFragment extends Fragment implements TextWatcher {
                     .setTitle(FROM)
                     .setLanguageClickListener((position, item) -> {
                         binding.lang1.setText(item.longName);
-                        translatorService.setCurrentInput(item);
+                        translatorManager.setCurrentInput(item);
                     }).show();
         });
 
@@ -163,7 +169,7 @@ public class TranslateFragment extends Fragment implements TextWatcher {
                     .setTitle(TO)
                     .setLanguageClickListener((position, item) -> {
                         binding.lang2.setText(item.longName);
-                        translatorService.setCurrentOutput(item);
+                        translatorManager.setCurrentOutput(item);
                         if (textEntity.inputText != null) {
                             translate(textEntity.inputText);
                         }
@@ -172,11 +178,11 @@ public class TranslateFragment extends Fragment implements TextWatcher {
     }
 
     private void translate(String query) {
-        if (!translatorService.canTranslate()) {
+        if (!translatorManager.canTranslate()) {
             Toast.makeText(getActivity(), getString(R.string.e_translation), Toast.LENGTH_SHORT).show();
             return;
         }
-        translatorService.translate(query).subscribe(defModel -> {
+        translatorManager.translate(query).subscribe(defModel -> {
             for (int k = 0; k < defModel.tr.size(); k++) {
                 defModel.tr.get(k).number = String.valueOf(k + 1);
             }
@@ -190,8 +196,9 @@ public class TranslateFragment extends Fragment implements TextWatcher {
             binding.setTranslationTextEntity(textEntity);
         });
     }
-    private void clearTextEntity(){
-        textEntity = translatorService.clearEntity();
+
+    private void clearTextEntity() {
+        textEntity = translatorManager.clearEntity();
         binding.setTranslationTextEntity(textEntity);
         meaningAdapter.removeList();
         binding.textArea.removeTextChangedListener(this);
@@ -202,7 +209,7 @@ public class TranslateFragment extends Fragment implements TextWatcher {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        translatorService.changeMark(false);
+        translatorManager.changeMark(false);
     }
 }
 

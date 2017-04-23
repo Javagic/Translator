@@ -16,7 +16,7 @@ import com.ilya.translator.fragments.BookmarkFragment;
 import com.ilya.translator.fragments.SettingsFragment;
 import com.ilya.translator.fragments.TranslateFragment;
 import com.ilya.translator.models.TextEntity;
-import com.ilya.translator.service.translation.TranslatorService;
+import com.ilya.translator.service.translation.TranslatorManager;
 import com.ilya.translator.utils.CRUDService;
 import com.ilya.translator.utils.Const;
 
@@ -25,9 +25,13 @@ import java.net.UnknownHostException;
 import static com.ilya.translator.utils.Const.Prefs.APP_PREFS;
 import static com.ilya.translator.utils.Const.Prefs.GET_LANGS;
 
+/**
+ * Основное активити, производится загрузка первоначальных данных
+ * или заполняется из базы данных
+ */
 public class MainActivity extends AppCompatActivity {
     AMainBinding binding;
-    TranslatorService translatorService;
+    TranslatorManager translatorManager;
     CRUDService crudService;
     BottomNavigationView bottomNavigationView;
 
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.a_main);
         bottomNavigationView = binding.bottomNavigation;
         crudService = CRUDService.getInstance(this);
-        translatorService = TranslatorService.getInstance();
+        translatorManager = TranslatorManager.getInstance();
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             switch (item.getItemId()) {
@@ -56,15 +60,19 @@ public class MainActivity extends AppCompatActivity {
             transaction.replace(R.id.frame_layout, selectedFragment);
             transaction.commit();
             return true;
-        });SharedPreferences prefs = getSharedPreferences(APP_PREFS, MODE_PRIVATE);
+        });
+        loadInitialData();
+    }
 
+    private void loadInitialData() {
+        SharedPreferences prefs = getSharedPreferences(APP_PREFS, MODE_PRIVATE);
         if (!prefs.getBoolean(GET_LANGS, false)) {
-            ProgressDialog loading = ProgressDialog.show(this, "Загружаю данные", "Подождите пожалуйста...", true);//set content
-            translatorService.loadLanguageVariations().subscribe(possibleLanguages -> {
+            ProgressDialog loading = ProgressDialog.show(this, getString(R.string.loading), getString(R.string.please_wait), true);//set content
+            translatorManager.loadLanguageVariations().subscribe(possibleLanguages -> {
                 Log.i(Const.MY_LOG, "getlangs loaded");
 
-                crudService.addLanguageTypes(translatorService.getLanguageTypes());
-                crudService.addPairs(translatorService.getPairs());
+                crudService.addLanguageTypes(translatorManager.getLanguageTypes());
+                crudService.addPairs(translatorManager.getPairs());
 
                 TranslateFragment translateFragment = TranslateFragment.newInstance();//init
                 getSupportFragmentManager().beginTransaction()
@@ -77,46 +85,24 @@ public class MainActivity extends AppCompatActivity {
                 loading.dismiss();
             }, throwable -> {
                 if (throwable instanceof UnknownHostException) {
-                    loading.setTitle("Ошибка");
+                    loading.setTitle(getString(R.string.e_error));
                     loading.setMessage(getString(R.string.e_loading));
                 }
                 Log.i(Const.MY_LOG, "error getlangs" + throwable.getMessage());
             });
         } else {
             Log.i(Const.MY_LOG, "local getlangs");
-            translatorService.setLanguageTypes(crudService.getLanguageTypeList());
-            translatorService.setPairs(crudService.getPairs());
+            translatorManager.setLanguageTypes(crudService.getLanguageTypeList());
+            translatorManager.setPairs(crudService.getPairs());
             TranslateFragment translateFragment = TranslateFragment.newInstance();//init
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.frame_layout, translateFragment)
                     .commit();
         }
-//region detect
-        /*
-    RxBackgroundWrapper.doInBackground(HttpService.getInstance().getTranslationApi().translate(TRANSLATION_API_KEY,"русский","ru-en","plain","1")).subscribe(
-        new Subscriber<Object>() {
-          @Override
-          public void onCompleted() {
-
-          }
-
-          @Override
-          public void onError(Throwable e) {
-
-          }
-
-          @Override
-          public void onNext(Object o) {
-
-          }
-        });
-      }
-    });*/
-        //endregion
     }
 
     public void setTranslateFragment(TextEntity textEntity) {
-        translatorService.setTextEntity(textEntity);
+        translatorManager.setTextEntity(textEntity);
         bottomNavigationView.findViewById(R.id.action_lang).performClick();
     }
 }

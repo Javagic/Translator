@@ -1,6 +1,5 @@
 package com.ilya.translator.models;
 
-import android.os.Parcelable;
 /**
  * Created by Ilya Reznik
  * reznikid@altarix.ru
@@ -8,7 +7,10 @@ import android.os.Parcelable;
  * on 05.04.17 22:18.
  */
 
-public class TextEntity implements Parcelable {
+/**
+ * сущность вводимого текста
+ */
+public class TextEntity  {
     public long id;
     public String inputLanguage;
     public String outputLanguage;
@@ -40,44 +42,6 @@ public class TextEntity implements Parcelable {
         this.isMarked = textEntity.isMarked;
     }
 
-
-    protected TextEntity(android.os.Parcel in) {
-        id = in.readLong();
-        inputLanguage = in.readString();
-        outputLanguage = in.readString();
-        inputText = in.readString();
-        outputText = in.readString();
-        isMarked = Boolean.parseBoolean(in.readString());
-        pos = in.readString();
-    }
-
-    public static final Creator<TextEntity> CREATOR = new Creator<TextEntity>() {
-        @Override
-        public TextEntity createFromParcel(android.os.Parcel in) {
-            return new TextEntity(in);
-        }
-
-        @Override
-        public TextEntity[] newArray(int size) {
-            return new TextEntity[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(android.os.Parcel parcel, int i) {
-        parcel.writeLong(id);
-        parcel.writeString(inputLanguage);
-        parcel.writeString(outputLanguage);
-        parcel.writeString(inputText);
-        parcel.writeString(outputText);
-        parcel.writeString(String.valueOf(isMarked));
-        parcel.writeString(pos);
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -16,6 +16,11 @@ import java.util.List;
  * skype be3bapuahta
  * on 11.04.17 20:52.
  */
+
+/**
+ * универсальный адаптер для простых списков
+ * @param <T> класс передаваемой в биндинг модели
+ */
 public class RecyclerBindingAdapter<T> extends RecyclerView.Adapter<RecyclerBindingAdapter.BindingHolder> {
     private int holderLayout, variableId;
     private List<T> items = new ArrayList<>();
@@ -38,10 +43,10 @@ public class RecyclerBindingAdapter<T> extends RecyclerView.Adapter<RecyclerBind
     public void onBindViewHolder(RecyclerBindingAdapter.BindingHolder holder, int position) {
         final T item = items.get(position);
         holder.getBinding().getRoot().setOnClickListener(v -> {
-            if (onItemClickListener != null) onItemClickListener.onItemClick(position, item);
+            if (onItemClickListener != null) onItemClickListener.onItemClick(holder.getAdapterPosition(), item);
         });
         holder.getBinding().getRoot().setOnLongClickListener(v -> {
-            if (onLongItemClickListener != null) onLongItemClickListener.onItemClick(position, item);
+            if (onLongItemClickListener != null) onLongItemClickListener.onItemClick(holder.getAdapterPosition(), item);
             return false;
         });
         holder.getBinding().setVariable(variableId, item);
@@ -82,10 +87,15 @@ public class RecyclerBindingAdapter<T> extends RecyclerView.Adapter<RecyclerBind
         void onItemClick(int position, T item);
     }
 
-    public static class BindingHolder extends RecyclerView.ViewHolder {
+    public void removeItem(int position){
+        notifyItemRemoved(position);
+        items.remove(position);
+    }
+
+    static class BindingHolder extends RecyclerView.ViewHolder {
         private ViewDataBinding binding;
 
-        public BindingHolder(View v) {
+        BindingHolder(View v) {
             super(v);
             binding = DataBindingUtil.bind(v);
         }

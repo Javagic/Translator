@@ -8,5 +8,14 @@
   <string name="search_hint">Поиск:</string>
   <string name="e_internet">Не удалось перевести, проверьте соединение с интернетом</string>
   <string name="e_translation">Выбранный перевод не поддерживается</string>
-  <string name="e_loading">"не удалось загрузить данные, проверьте интернет"</string>
+  <string name="e_loading">не удалось загрузить данные, проверьте интернет</string>
+  <string name="e_error">Ошибка</string>
+  <string name="delete_translation">Удалить перевод?</string>
+  <string name="history_cleared">История удалена</string>
+  <string name="loading">Загружаю данные</string>
+  <string name="please_wait">Подождите пожалуйста…</string>
+  <string name="data_refreshed">Данные успешно обновлены</string>
+  <string name="translated_by_yandex">Переведено сервисом Яндекс.Переводчик</string>
+  <string name="clear_history">Очистить историю</string>
+  <string name="refres_possible_languages">Обновить доступные языки</string>
 </resources>

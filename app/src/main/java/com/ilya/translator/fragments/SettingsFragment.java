@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.ilya.translator.R;
 import com.ilya.translator.databinding.FSettingsBinding;
-import com.ilya.translator.service.translation.TranslatorService;
+import com.ilya.translator.service.translation.TranslatorManager;
 import com.ilya.translator.utils.CRUDService;
 
 /**
@@ -20,10 +20,16 @@ import com.ilya.translator.utils.CRUDService;
  * skype be3bapuahta
  * on 05.04.17 20:07.
  */
+
+/**
+ * Фрагмент для управления настройками приложения :
+ * -Обновление списка доступных языков
+ * -Очистка базы данных приложения
+ */
 public class SettingsFragment extends Fragment {
   FSettingsBinding binding;
   CRUDService crudService;
-  TranslatorService translatorService;
+  TranslatorManager translatorManager;
 
   public static SettingsFragment newInstance() {
     SettingsFragment fragment = new SettingsFragment();
@@ -41,21 +47,21 @@ public class SettingsFragment extends Fragment {
     binding = DataBindingUtil.inflate(inflater, R.layout.f_settings, container, false);
     View rootView = binding.getRoot();
     crudService = CRUDService.getInstance();
-    translatorService = TranslatorService.getInstance();
+    translatorManager = TranslatorManager.getInstance();
     binding.clearHistory.setOnClickListener(view -> {
       crudService.removeAllHistory();
-      Toast.makeText(getActivity(), "История удалена", Toast.LENGTH_SHORT).show();
+      Toast.makeText(getActivity(), R.string.history_cleared, Toast.LENGTH_SHORT).show();
     });
 
     binding.refresh.setOnClickListener(view -> {
-      ProgressDialog loading = ProgressDialog.show(getActivity(), "Загружаю данные", "Подождите пожалуйста...", true);//set content
-      translatorService.loadLanguageVariations().subscribe(possibleLanguages -> {
+      ProgressDialog loading = ProgressDialog.show(getActivity(), getString(R.string.loading), getString(R.string.please_wait), true);//set content
+      translatorManager.loadLanguageVariations().subscribe(possibleLanguages -> {
         crudService.removeAllLanguages();
         crudService.removeAllPairs();
-        crudService.addLanguageTypes(translatorService.getLanguageTypes());
-        crudService.addPairs(translatorService.getPairs());
+        crudService.addLanguageTypes(translatorManager.getLanguageTypes());
+        crudService.addPairs(translatorManager.getPairs());
         loading.dismiss();
-        Toast.makeText(getActivity(), "Данные успешно обновлены", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(),  getString(R.string.data_refreshed), Toast.LENGTH_SHORT).show();
       }, throwable -> {
         loading.dismiss();
         Toast.makeText(getActivity(), getActivity().getString(R.string.e_internet), Toast.LENGTH_SHORT).show();

@@ -14,15 +14,14 @@ import rx.Observable;
  * skype be3bapuahta
  * on 03.04.17 19:37.
  */
+
+/**
+ * Доступ к Api Yandex переводчика
+ */
 public interface TranslationApi {
 
     @POST(Const.TRANSLATION_API_URL + "/getLangs")
     Observable<PossibleLanguages> getLanguages(@Query("key") String key, @Query("ui") String langCode);
-
-    @POST(Const.TRANSLATION_API_URL + "/detect")
-    Observable<Object> detect(@Query("key") String key,
-                              @Query("text") String text,
-                              @Query("hint") String hint);
 
     @POST(Const.TRANSLATION_API_URL + "/translate")
     Observable<LanguageTranslation> translate(@Query("key") String key,
@@ -30,9 +29,5 @@ public interface TranslationApi {
                                               @Query("lang") String lang,
                                               @Query("format") String plain,
                                               @Query("options") String options);
-    @POST(Const.TRANSLATION_API_URL + "/translate")
-    Observable<LanguageTranslation> translateSimple(@Query("key") String key,
-                                              @Query("text") String text,
-                                              @Query("lang") String lang);
 
 }

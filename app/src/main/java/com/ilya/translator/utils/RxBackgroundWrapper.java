@@ -10,6 +10,10 @@ import rx.schedulers.Schedulers;
  * skype be3bapuahta
  * on 03.04.17 20:14.
  */
+
+/**
+ * обертка для выполнения запроса в потоке
+ */
 public class RxBackgroundWrapper {
 
 

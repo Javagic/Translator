@@ -24,24 +24,31 @@ import rx.functions.Func1;
  * skype be3bapuahta
  * on 08.04.17 15:54.
  */
-public class TranslatorService {
-    private static TranslatorService instance;
+
+public class TranslatorManager {
+    private static TranslatorManager instance;
     private List<LanguageType> languageTypes;
     private List<Pair> pairs;
+
+    /**
+     * параметры перевода в данном  состоянии
+     */
     private LanguageType currentInput;
     private LanguageType currentOutput;
     private Pair currentPair;
-    public TextEntity textEntity;
     private boolean canTranslate;
 
-    public static TranslatorService getInstance() {
+
+    public TextEntity textEntity;
+
+    public static TranslatorManager getInstance() {
         if (instance == null) {
-            instance = new TranslatorService();
+            instance = new TranslatorManager();
         }
         return instance;
     }
 
-    private TranslatorService() {
+    private TranslatorManager() {
         textEntity = new TextEntity();
         setCurrentInput(new LanguageType("ru", "Русский"));
         setCurrentOutput(new LanguageType("en", "Английский"));
@@ -50,6 +57,9 @@ public class TranslatorService {
         textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
     }
 
+    /**
+     * начальная загрузка возможных языков и пар переводов
+     */
     public Observable<PossibleLanguages> loadLanguageVariations() {
         return HttpService.getInstance().getLanguages("ru").compose(RxBackgroundWrapper.applySchedulers())
                 .doOnNext(possibleLanguages1 -> {
@@ -65,14 +75,10 @@ public class TranslatorService {
         return languageTypes;
     }
 
-    private boolean checkPair() {
-        for (Pair pair : pairs) {
-            if (pair.toString().equals(currentPair.toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
+
+    /**
+     * проверка возможности перевода в используемом API
+     */
 
     public Observable<DictionaryModel.DefModel> translate(CharSequence text) {
         Log.i(Const.MY_LOG, "translate: " + text.toString() + " " + currentPair.toString(), null);
@@ -95,30 +101,6 @@ public class TranslatorService {
         });
     }
 
-    public void setCurrentInput(LanguageType currentInput) {
-        this.currentInput = currentInput;
-        if (currentOutput != null)
-            makePair();
-    }
-
-    public void setCurrentOutput(LanguageType currentOutput) {
-        this.currentOutput = currentOutput;
-        if (currentInput != null)
-            makePair();
-    }
-
-    private void makePair() {
-        currentPair = new Pair(currentInput, currentOutput);
-        canTranslate = pairs != null && checkPair();
-    }
-
-    public LanguageType getCurrentInput() {
-        return currentInput;
-    }
-
-    public LanguageType getCurrentOutput() {
-        return currentOutput;
-    }
 
     public TextEntity swapLanguages() {
         LanguageType languageType = new LanguageType();
@@ -134,7 +116,7 @@ public class TranslatorService {
         textEntity.outputLanguage = currentOutput.shortName;
         textEntity.inputText = inputText;
         textEntity.outputText = outputText;
-        textEntity.id =CRUDService.getInstance().addTextEntity(textEntity);
+        textEntity.id = CRUDService.getInstance().addTextEntity(textEntity);
         return textEntity;
     }
 
@@ -163,8 +145,11 @@ public class TranslatorService {
         makePair();
     }
 
+    /**
+     * добавление переведенного текста в избранное
+     */
     public boolean changeMark(boolean flag) {
-        textEntity.isMarked = !textEntity.isMarked;
+        textEntity.isMarked = flag;
         if (flag) {
             for (TextEntity entity : CRUDService.getInstance().getFavorites()) {
                 if (textEntity.equals(entity)) {
@@ -193,4 +178,30 @@ public class TranslatorService {
         this.pairs = pairs;
         makePair();
     }
+
+    public void setCurrentInput(LanguageType currentInput) {
+        this.currentInput = currentInput;
+        if (currentOutput != null)
+            makePair();
+    }
+
+    public void setCurrentOutput(LanguageType currentOutput) {
+        this.currentOutput = currentOutput;
+        if (currentInput != null)
+            makePair();
+    }
+
+    private void makePair() {
+        currentPair = new Pair(currentInput, currentOutput);
+        canTranslate = pairs != null && checkPair();
+    }
+    private boolean checkPair() {
+        for (Pair pair : pairs) {
+            if (pair.toString().equals(currentPair.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

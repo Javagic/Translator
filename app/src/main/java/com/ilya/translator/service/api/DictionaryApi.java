@@ -13,6 +13,10 @@ import rx.Observable;
  * skype be3bapuahta
  * on 08.04.17 20:22.
  */
+
+/**
+ * Api Yandex Dictionary
+ */
 public interface DictionaryApi {
 
     @POST(Const.DICTIONARY_API_URL + "/lookup")

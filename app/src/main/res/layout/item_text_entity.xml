@@ -40,6 +40,7 @@
             android:layout_marginTop="6dp"
             android:layout_toEndOf="@id/mark"
             android:text="@{textEntity.inputText}"
+            android:layout_toStartOf="@+id/pair"
             tools:text="Привет" />
 
         <TextView
@@ -52,6 +53,7 @@
             android:layout_toEndOf="@id/mark"
             android:textColor="@color/gray_600"
             android:text="@{textEntity.outputText}"
+            android:layout_toStartOf="@+id/pair"
             tools:text="Hi" />
 
         <TextView
@@ -63,6 +65,7 @@
             android:layout_marginTop="15dp"
             android:textColor="@color/gray_600"
             android:textSize="15sp"
+            tools:text="en-ru"
             android:text="@{textEntity.inputLanguage +'-'+textEntity.outputLanguage}"
             />
     </RelativeLayout>
